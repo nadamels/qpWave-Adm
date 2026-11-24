@@ -185,17 +185,20 @@ write_tsv(src_freq, file.path(OUTDIR, "qpadm_source_frequency_in_feasible_models
 n_by_size <- res %>% filter(status == "FEASIBLE") %>% count(target, nsrc, name = "n_feasible")
 write_tsv(n_by_size, file.path(OUTDIR, "qpadm_feasible_models_by_size.tsv"))
 
-# best model at EACH size (feasible ones first, then by p): shows what 2-, 3-, 4- and 5-way models achieve,
+# best model at EACH size (FEASIBLE first, then models whose weights are all in [0,1], then by p). A high p with
+# weights_valid = FALSE (negative / huge weights) is NOT a fit: the target lies outside the span of those sources.
+# shows what 2-, 3-, 4- and 5-way models achieve,
 # even when a simpler size already fits or nothing fits at all
 best_by_size <- res %>% group_by(target, nsrc) %>%
   summarise(n_models = n(), n_feasible = sum(status == "FEASIBLE"),
             .groups = "drop") %>%
-  left_join(res %>% group_by(target, nsrc) %>% arrange(desc(status == "FEASIBLE"), desc(p)) %>% slice_head(n = 1) %>%
-              ungroup() %>% select(target, nsrc, best_model = left, p, status, weights), by = c("target", "nsrc")) %>%
+  left_join(res %>% group_by(target, nsrc) %>% arrange(desc(status == "FEASIBLE"), desc(feasible), desc(p)) %>% slice_head(n = 1) %>%
+              ungroup() %>% select(target, nsrc, best_model = left, p, status, weights_valid = feasible, weights),
+            by = c("target", "nsrc")) %>%
   arrange(target, nsrc)
 write_tsv(best_by_size, file.path(OUTDIR, "qpadm_best_by_size.tsv"))
 cat("\n---- best model at each size (p, status) ----\n")
-print(best_by_size %>% mutate(p = signif(p, 3)) %>% select(target, nsrc, n_feasible, p, status, best_model), n = Inf, width = 200)
+print(best_by_size %>% mutate(p = signif(p, 3)) %>% select(target, nsrc, n_feasible, p, status, weights_valid, best_model), n = Inf, width = 200)
 
 # --------------------------------- 5. weights +- SE and LOO-right robustness ----
 msg("re-fitting the top ", TOP_N, " models per target with block-jackknife SEs")
