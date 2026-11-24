@@ -58,11 +58,22 @@ ADMIXTURE and PCA are **discovery** tools; qpWave/qpAdm are **hypothesis tests**
 6. **Multiple testing.** Hundreds of models per target are tested at p >= 0.05 without correction; read the top-N alternatives,
    the leave-one-right-out table and source frequencies, not just the best model.
 
+## Trying larger models (4- and 5-way)
+```bash
+# keep the f2 cache from the first run (the recompute is the slow part) but write results to a new folder
+F2DIR=$DATA/qpwave_qpadm_out/f2_blocks OUTDIR=$DATA/qpwave_qpadm_out_max5 MAX_SOURCES=5 sbatch --export=ALL run_qpwave_qpadm.sh
+```
+One run with `MAX_SOURCES=5` covers 1- to 5-way models (14 candidates -> 3,472 source sets). The selection rule still prefers the
+fewest sources, so look at `qpadm_best_by_size.tsv` (best model at each size per target) to compare 3-, 4- and 5-way fits.
+Caution: every extra source (a) adds flexibility, so a model can fit simply because it has more freedom, and (b) removes a pool population
+from the RIGHT set, which lowers the power to reject. Prefer the smallest size that fits, require every weight >= `MIN_WEIGHT`,
+check the leave-one-right-out table, and treat a 5-way "fit" with wide SEs as weak evidence.
+
 ## Outputs (`qpwave_qpadm_out/`)
 `explore/` (ADMIXTURE/PCA: `admixture_group_profiles.png`, `pca_targets_vs_candidates.png`, `admixture_component_coverage.tsv`,
 `admixture_pca_candidate_screen.tsv`, `admixture_pool_redundancy.tsv`, …) · `qpwave_targets_pairwise.tsv|png` · `qpwave_targets_joint_rank.tsv` ·
 `qpwave_source_screen.tsv` · `qpadm_all_models.tsv` · `qpadm_selected_models.tsv` (top-N, weights ± SE) · `qpadm_one_source_fits.tsv` ·
-`qpadm_best_loo_right.tsv` · `qpadm_source_frequency_in_feasible_models.tsv` · `qpadm_feasible_models_by_size.tsv` ·
+`qpadm_best_loo_right.tsv` · `qpadm_source_frequency_in_feasible_models.tsv` · `qpadm_feasible_models_by_size.tsv` · `qpadm_best_by_size.tsv` ·
 `qpadm_best_models.pdf|png` · `qpadm_top_models.pdf|png` · `pop_pools.used.tsv` · `run_info.txt`.
 
 ## Caveats (read before interpreting)
