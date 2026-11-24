@@ -22,21 +22,23 @@ Chukchi	right_base	Chukchi
 WHG	right_base	WHG
 EEHG	right_base	EEHG
 # ---------------- Iran-internal ancient sources ----------------
+# Only the Iranian Neolithic (Ganj_Dareh_N) is a source. The post-Neolithic Iranian groups are set to "ignore"
+# (removed completely, NOT put on the right) so that proximal Iranian sources cannot give 1-source models.
 Iran_N	pool	Ganj_Dareh_N
-Iran_ChL	pool	IRN_HajjiFiruz_ChL
-Iran_ChL	pool	Hajji_Firuz_C
-Iran_ChL	pool	IRN_TepeHissar_ChL
-Iran_ChL	pool	Tepe_Hissar_C
-Iran_BA_SE	pool	IRN_Shahr_I_Sokhta_BA
-Iran_BA_SE	pool	Shahr_I_Sokhta_BA1
-Iran_BIA_NW	pool	IRN_Hasanlu_IA
-Iran_BIA_NW	pool	IRN_Hasanlu_MBA
-Iran_BIA_NW	pool	IRN_Hasanlu_LBA_A
-Iran_BIA_NW	pool	IRN_Hasanlu_LBA_B
-Iran_BIA_NW	pool	IRN_DinkhaTepe_BIA_A
-Iran_BIA_NW	pool	IRN_DinkhaTepe_BIA_B
-Iran_BIA_NW	pool	IRN_HajjiFiruz_BA
-Iran_BIA_NW	pool	IRN_HajjiFiruz_IA
+Iran_ChL	ignore	IRN_HajjiFiruz_ChL
+Iran_ChL	ignore	Hajji_Firuz_C
+Iran_ChL	ignore	IRN_TepeHissar_ChL
+Iran_ChL	ignore	Tepe_Hissar_C
+Iran_BA_SE	ignore	IRN_Shahr_I_Sokhta_BA
+Iran_BA_SE	ignore	Shahr_I_Sokhta_BA1
+Iran_BIA_NW	ignore	IRN_Hasanlu_IA
+Iran_BIA_NW	ignore	IRN_Hasanlu_MBA
+Iran_BIA_NW	ignore	IRN_Hasanlu_LBA_A
+Iran_BIA_NW	ignore	IRN_Hasanlu_LBA_B
+Iran_BIA_NW	ignore	IRN_DinkhaTepe_BIA_A
+Iran_BIA_NW	ignore	IRN_DinkhaTepe_BIA_B
+Iran_BIA_NW	ignore	IRN_HajjiFiruz_BA
+Iran_BIA_NW	ignore	IRN_HajjiFiruz_IA
 # ---------------- Anatolia / Levant ----------------
 Anatolia_N	pool	Anatolia_N
 Anatolia_N	pool	Anatolia_Neolithic

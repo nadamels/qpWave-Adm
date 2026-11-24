@@ -24,8 +24,8 @@ Run settings are environment variables (`MAX_SOURCES=4 PTHRESH=0.01 sbatch --exp
 **Sources / right set** live in `config/pop_pools.tsv` (edit freely):
 * `right_base` = always RIGHT, never a source: Mbuti, Papuan, Karitiana, Han, Onge, Chukchi (deep outgroups, o9a-style) +
   **WHG and EEHG** (regional discriminators that help separate CHG-like/Iran_N ancestry from Anatolia_N ancestry).
-* `pool` = 16 candidate sources (Iran_N, Iran_ChL, Iran_BA_SE, Iran_BIA_NW, Anatolia_N, Anatolia_ChL_BA, Levant_N, Natufian, Armenia_N,
-  Armenia_EBA, Armenia_LBA_IA, Steppe_EMBA, Steppe_MLBA, Turan_N, BMAC, South_Asia_BA). For every model, pool populations not used on the
+* `pool` = 13 candidate sources (Iran_N = Ganj_Dareh_N is the only Iranian source; Anatolia_N, Anatolia_ChL_BA, Levant_N, Natufian, Armenia_N,
+  Armenia_EBA, Armenia_LBA_IA, Steppe_EMBA, Steppe_MLBA, Turan_N, BMAC, South_Asia_BA). Post-Neolithic Iranian groups (Iran_ChL, Iran_BA_SE, Iran_BIA_NW) are `ignore`d on purpose (they are so close to modern Iranians that they give 1-source models); set their role back to `pool` in the TSV to use them. For every model, pool populations not used on the
   LEFT are moved to the RIGHT ("rotating" qpAdm, Harney et al. 2021), so each model has its own right set.
 
 **Source selection** = (i) qpWave on each candidate source set (right = outgroups + remaining pool): the rank k-2 hypothesis must be
@@ -42,7 +42,7 @@ If nothing fits, the best-p model is reported and flagged `NO_FIT_...`.
 * **Ancient genomes here are imputed diploid calls.** `extract_f2` is run with `adjust_pseudohaploid=FALSE`. Imputation pulls genotypes toward the
   reference panel and can shrink differences between ancient groups; treat results as exploratory and confirm key models on non-imputed data if possible.
 * `Mod_Turk` is a single genome; its weights are valid for that individual only. `Armenia_N` (2), `Natufian` (2), `South_Asia_BA` (2), `WHG` (2) are tiny.
-* Pooled ancient groups are heterogeneous (`Iran_BIA_NW`, `Armenia_LBA_IA`, `Anatolia_ChL_BA`); change the pooling in `pop_pools.tsv`.
+* Pooled ancient groups are heterogeneous (`Armenia_LBA_IA`, `Anatolia_ChL_BA`); change the pooling in `pop_pools.tsv`.
 * ~700 models per target are tested at p >= 0.05 without multiple-testing correction; look at the top-N alternatives, the
   leave-one-right-out table and source frequencies, not only the single best model. Many p-values near 0.05-0.1 with wide SEs means weak support.
 * No CHG, Ust_Ishim, Kostenki14 or MA1 genomes are in this dataset.
