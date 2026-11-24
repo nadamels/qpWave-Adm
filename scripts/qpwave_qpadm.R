@@ -69,8 +69,16 @@ if (length(right_base) < 4) warning("Fewer than 4 fixed right populations; qpAdm
 write_tsv(tibble(order = seq_along(pool), source = pool), file.path(OUTDIR, "source_order.tsv"))
 
 # ------------------------------------------------------------ 0. f2 blocks ----
-have_f2 <- dir.exists(F2DIR) && length(list.files(F2DIR)) > 0
+# The cache is trusted ONLY if a completion marker written after a successful extract_f2() matches the current
+# population labelling (md5 of the labelled .fam + the population list). A killed/partial run, or a changed
+# pool/target definition, therefore triggers a clean recomputation instead of a "file not found" error later.
+f2_key <- c(paste(sort(all_pops), collapse = ","), unname(tools::md5sum(paste0(PLINK_PREFIX, ".fam"))))
+f2_marker <- file.path(F2DIR, ".f2_complete")
+have_f2 <- file.exists(f2_marker) && identical(readLines(f2_marker, warn = FALSE), f2_key)
+if (dir.exists(F2DIR) && !have_f2 && !FORCE_F2)
+  msg("existing f2 blocks are incomplete or were built for a different population set -> recomputing")
 if (!have_f2 || FORCE_F2) {
+  if (dir.exists(F2DIR)) unlink(F2DIR, recursive = TRUE)
   bimfile <- paste0(PLINK_PREFIX, ".bim")
   bim_head <- read_table(bimfile, col_names = FALSE, col_types = "cccccc", n_max = 200000, progress = FALSE)
   no_genetic_map <- all(as.numeric(bim_head$X3) == 0)
@@ -81,6 +89,7 @@ if (!have_f2 || FORCE_F2) {
   extract_f2(PLINK_PREFIX, F2DIR, pops = all_pops, blgsize = blg, maxmiss = 0,
              adjust_pseudohaploid = FALSE, auto_only = TRUE, n_cores = NCORES,
              maxmem = MAXMEM_MB, overwrite = TRUE, verbose = TRUE)
+  writeLines(f2_key, f2_marker)
 } else msg("re-using f2 blocks in ", F2DIR, " (set FORCE_F2=1 to recompute)")
 f2 <- f2_from_precomp(F2DIR, pops = all_pops, afprod = TRUE, verbose = FALSE)
 lost <- setdiff(all_pops, dimnames(f2)[[1]])
