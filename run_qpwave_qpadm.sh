@@ -28,9 +28,16 @@ CONDA_ACTIVATE=${CONDA_ACTIVATE:-/share/apps/NYUAD5/miniconda/3-4.11.0/bin/activ
 REPO_DIR=${REPO_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}}
 [[ -f $REPO_DIR/scripts/qpwave_qpadm.R ]] || REPO_DIR=$DATA_DIR/qpWave-Adm
 OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out}
+# Step 0 inputs (ADMIXTURE K=8 + PCA of the LD-pruned merged data; row order = the fam given here)
+RUN_EXPLORE=${RUN_EXPLORE:-1}
+EXPLORE_FAM=${EXPLORE_FAM:-$REPO_DIR/fam_meta/all_anc_mod.run3.LDpruned.pca.fam}
+EXPLORE_Q=${EXPLORE_Q:-$REPO_DIR/fam_meta/all_anc_mod.run3.LDpruned.8.Q}
+EXPLORE_EIGENVEC=${EXPLORE_EIGENVEC:-$REPO_DIR/fam_meta/all_anc_mod.run3.LDpruned.pca.eigenvec}
 
 export PTHRESH=${PTHRESH:-0.05}              # qpWave / qpAdm significance level
-export MAX_SOURCES=${MAX_SOURCES:-3}         # largest source set tried (3 -> 1-, 2- and 3-way models)
+export MAX_SOURCES=${MAX_SOURCES:-3}         # largest source set tried
+export MIN_SOURCES=${MIN_SOURCES:-2}         # smallest model that may be selected (1-source fits are listed separately)
+export MIN_WEIGHT=${MIN_WEIGHT:-0.05}        # each source must contribute >= this fraction, else it is not a real n-way model
 export TOP_N=${TOP_N:-3}                     # competing models kept per target (SEs + plots)
 export WEIGHT_TOL=${WEIGHT_TOL:-0}           # allow weights in [-tol, 1+tol]
 export FORCE_F2=${FORCE_F2:-0}               # 1 = recompute f2 blocks
@@ -58,6 +65,27 @@ for f in "$DATA_DIR/$BED_PREFIX".{bed,bim,fam} "$REPO_DIR/fam_meta/sample_meta.t
 done
 mkdir -p "$OUTDIR/plink"
 echo "[$(date +%T)] data: $DATA_DIR/$BED_PREFIX   out: $OUTDIR   cores: $NCORES   maxmem: ${MAXMEM_MB}MB"
+
+# ---------------- provenance: the candidate pool is frozen BEFORE qpAdm is looked at ----------
+cp "$REPO_DIR/config/pop_pools.tsv" "$OUTDIR/pop_pools.used.tsv"
+{
+  echo "date: $(date -Is)"; echo "git_commit: $(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || echo NA)"
+  echo "git_dirty: $(git -C "$REPO_DIR" status --porcelain config scripts 2>/dev/null | wc -l) modified file(s) in config/ scripts/"
+  echo "pop_pools_md5: $(md5sum "$OUTDIR/pop_pools.used.tsv" | cut -d' ' -f1)"
+  echo "data: $DATA_DIR/$BED_PREFIX"
+  echo "PTHRESH=$PTHRESH MIN_SOURCES=$MIN_SOURCES MAX_SOURCES=$MAX_SOURCES MIN_WEIGHT=$MIN_WEIGHT WEIGHT_TOL=$WEIGHT_TOL TOP_N=$TOP_N"
+} > "$OUTDIR/run_info.txt"
+
+# ---------------- 0. ADMIXTURE / PCA exploration (hypothesis generation only; never an input to qpAdm) ----
+if [[ $RUN_EXPLORE == 1 && -s $EXPLORE_Q && -s $EXPLORE_EIGENVEC && -s $EXPLORE_FAM ]]; then
+  echo "[$(date +%T)] step 0/3  ADMIXTURE + PCA exploration (candidate coverage check)"
+  python3 -I "$REPO_DIR/scripts/explore_admixture_pca.py" --meta "$REPO_DIR/fam_meta/sample_meta.tsv" --fam "$EXPLORE_FAM" \
+      --pools "$REPO_DIR/config/pop_pools.tsv" --q "$EXPLORE_Q" --eigenvec "$EXPLORE_EIGENVEC" --outdir "$OUTDIR/explore" \
+    && OUTDIR="$OUTDIR/explore" Rscript "$REPO_DIR/scripts/plot_admixture_pca.R" \
+    || echo "WARNING: exploration step failed; continuing with qpWave/qpAdm (it does not depend on it)"
+else
+  echo "[$(date +%T)] step 0/3  skipped (RUN_EXPLORE=$RUN_EXPLORE or inputs missing)"
+fi
 
 # ---------------- 1. population labels: FID = target group / source group -----
 echo "[$(date +%T)] step 1/3  building population-labelled .fam"

@@ -27,7 +27,7 @@ lev = drift(weur, .03)
 steppe = 0.6 * eehg + 0.4 * irann
 mix = lambda *a: sum(w * c for w, c in a)
 comp = {
-    "Mbuti": drift(afr, .01), "Papuan": drift(ea, .08), "Han": drift(ea, .02), "Karitiana": drift(ea, .10),
+    "Mbuti": drift(afr, .01), "Papuan": drift(ea, .08), "East_Asia_Han": drift(ea, .02), "Karitiana": drift(ea, .10),
     "Onge": drift(ea, .12), "Chukchi": drift(ea, .05), "WHG": whg, "EEHG": eehg,
     "Iran_N": drift(irann, .01), "Iran_ChL": drift(mix((.7, irann), (.3, anat)), .01),
     "Iran_BA_SE": drift(mix((.6, irann), (.2, anat), (.2, ea)), .01),

@@ -40,6 +40,9 @@ NCORES        <- as.integer(getenv("NCORES", 4))
 PTHRESH       <- as.numeric(getenv("PTHRESH", 0.05))          # qpAdm / qpWave significance level
 WEIGHT_TOL    <- as.numeric(getenv("WEIGHT_TOL", 0))          # weights must lie in [-tol, 1+tol]
 MAX_SOURCES   <- as.integer(getenv("MAX_SOURCES", 3))         # largest source set tried
+MIN_SOURCES   <- as.integer(getenv("MIN_SOURCES", 2))         # smallest model that may be SELECTED (1-way fits are still reported separately)
+MIN_WEIGHT    <- as.numeric(getenv("MIN_WEIGHT", 0.05))       # every source must contribute at least this much, else the model is
+                                                              # really an (n-1)-source model plus noise
 TOP_N         <- as.integer(getenv("TOP_N", 3))               # models kept per target for plots/SEs
 MAXMEM_MB     <- as.integer(getenv("MAXMEM_MB", 16000))
 BLGSIZE       <- getenv("BLGSIZE", "auto")                    # "auto" | Morgans (0.05) | bp if > 100 (2e6)
@@ -126,21 +129,31 @@ fit_model <- function(target, left, right = right_for(left)) {
   w <- if (k == 1) 1 else as.numeric(unlist(o[1, wcols]))
   tibble(target = target, nsrc = k, left = paste(left, collapse = "+"),
          n_right = length(right), chisq = o$chisq[1], dof = o$dof[1], p = o$p[1],
-         weights = paste(signif(w, 4), collapse = ";"),
+         weights = paste(signif(w, 4), collapse = ";"), min_weight = min(w),
          feasible = all(w >= -WEIGHT_TOL & w <= 1 + WEIGHT_TOL))
 }
 jobs <- expand_grid(target = targets, i = seq_along(combos))
 msg("qpAdm: ", nrow(jobs), " models (", length(targets), " targets x ", length(combos), " source sets)")
 res <- pmap_list(seq_len(nrow(jobs)), function(j) fit_model(jobs$target[j], combos[[jobs$i[j]]])) %>% bind_rows()
 res <- res %>%
-  mutate(status = case_when(p >= PTHRESH & feasible ~ "FEASIBLE",
-                            feasible                ~ "REJECTED_p",
-                            TRUE                    ~ "INFEASIBLE_weights"))
+  mutate(status = case_when(p >= PTHRESH & feasible & min_weight >= MIN_WEIGHT ~ "FEASIBLE",
+                            p >= PTHRESH & feasible                            ~ "NEGLIGIBLE_SOURCE",
+                            feasible                                           ~ "REJECTED_p",
+                            TRUE                                               ~ "INFEASIBLE_weights"))
 write_tsv(res, file.path(OUTDIR, "qpadm_all_models.tsv"))
-msg("qpAdm done: ", sum(res$status == "FEASIBLE"), " feasible models (p >= ", PTHRESH, ", weights in [0,1])")
+msg("qpAdm done: ", sum(res$status == "FEASIBLE" & res$nsrc >= MIN_SOURCES), " feasible models with >= ", MIN_SOURCES,
+    " sources (p >= ", PTHRESH, ", every weight in [", MIN_WEIGHT, ",1])")
+
+# 1-source fits: the target is statistically indistinguishable from ONE candidate w.r.t. the right set.
+# Reported for transparency; not selected (MIN_SOURCES) because such a fit says "clade with X", not "admixed".
+one <- res %>% filter(nsrc == 1, status == "FEASIBLE") %>% arrange(target, desc(p)) %>% select(target, source = left, p, chisq, dof)
+write_tsv(one, file.path(OUTDIR, "qpadm_one_source_fits.tsv"))
+if (nrow(one)) for (t in unique(one$target))
+  msg("NOTE 1-source fit(s) for ", t, ": ", paste0(one$source[one$target == t], " (p=", signif(one$p[one$target == t], 2), ")", collapse = ", "))
 
 # ------------------------------------------------------------ 4. selection ----
 pick_models <- function(d) {
+  d <- d %>% filter(nsrc >= MIN_SOURCES)
   feas <- d %>% filter(status == "FEASIBLE") %>% arrange(nsrc, desc(p)) %>% mutate(selection = "feasible")
   if (nrow(feas)) return(feas)
   fb <- d %>% filter(feasible) %>% arrange(desc(p)) %>% mutate(selection = "NO_FIT_best_p_with_valid_weights")
@@ -151,8 +164,9 @@ ranked <- res %>% group_by(target) %>% group_modify(~ pick_models(.x)) %>% ungro
 top <- ranked %>% group_by(target) %>% slice_head(n = TOP_N) %>% mutate(rank = row_number()) %>% ungroup()
 
 # how often is each source part of a feasible model? (source-selection evidence)
-nfeas <- res %>% filter(status == "FEASIBLE") %>% count(target, name = "n_feasible_total")
-src_freq <- res %>% filter(status == "FEASIBLE") %>%
+feas_sel <- res %>% filter(status == "FEASIBLE", nsrc >= MIN_SOURCES)
+nfeas <- feas_sel %>% count(target, name = "n_feasible_total")
+src_freq <- feas_sel %>%
   mutate(src = strsplit(left, "\\+")) %>% unnest(src) %>%
   count(target, src, name = "n_feasible_models") %>%
   left_join(nfeas, by = "target") %>%

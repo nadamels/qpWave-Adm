@@ -27,6 +27,8 @@ def main():
     ap.add_argument("--fam", required=True)
     ap.add_argument("--pools", required=True)
     ap.add_argument("--outdir", required=True)
+    ap.add_argument("--keep-ignored", action="store_true",
+                    help="also label groups whose role is 'ignore' (used only by explore_admixture_pca.py)")
     a = ap.parse_args()
 
     with open(a.meta, newline="", encoding="utf-8") as f:
@@ -89,12 +91,12 @@ def main():
             assign[iid] = target[iid]; role_of[assign[iid]] = "target"
         elif meta[iid]["Super-population"] != "Iran" and meta[iid]["Population"] in label2group:
             g = label2group[meta[iid]["Population"]]
-            if group_role[g] != "ignore":
+            if a.keep_ignored or group_role[g] != "ignore":
                 assign[iid] = g; role_of[g] = group_role[g]
         elif meta[iid]["Super-population"] == "Iran" and meta[iid]["Undergone Imputation"] == "Yes" \
                 and meta[iid]["Population"] in label2group:   # ancient Iranians live in super-pop 'Iran'
             g = label2group[meta[iid]["Population"]]
-            if group_role[g] != "ignore":
+            if a.keep_ignored or group_role[g] != "ignore":
                 assign[iid] = g; role_of[g] = group_role[g]
 
     os.makedirs(os.path.join(a.outdir, "plink"), exist_ok=True)
@@ -113,11 +115,11 @@ def main():
     TGT_ORDER = ["Mod_Zoroastrian", "Mod_Turk", "Mod_Jewish_branch", "Mod_Armenian_Assyrian", "Mod_Central_Iranian"]
 
     def sort_key(g):
-        r = ["target", "pool", "right_base"].index(role_of[g])
+        r = ["target", "pool", "right_base", "ignore"].index(role_of[g])
         pos = TGT_ORDER.index(g) if g in TGT_ORDER else group_order.index(g)
         return (r, pos)
 
-    configured = {g for g, ro in group_role.items() if ro != "ignore"}
+    configured = {g for g, ro in group_role.items() if a.keep_ignored or ro != "ignore"}
     with open(os.path.join(a.outdir, "group_summary.tsv"), "w") as out:
         out.write("group\trole\tn\n")
         for g in sorted(n, key=sort_key):

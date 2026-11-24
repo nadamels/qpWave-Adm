@@ -8,13 +8,12 @@
 group	role	population_label
 # ---------------- RIGHT base set (never sources) ----------------
 # (a) deep / non-West-Eurasian outgroups, modelled on the "o9a"-style right set of Agranat-Tamir et al. 2020
-#     (Mbuti, Han, Papuan, Onge, Chukchi, Karitiana). Ust_Ishim, Kostenki14 and MA1 are NOT in this dataset.
+#     (Mbuti, Papuan, Onge, Chukchi, Karitiana). Han is NOT here: it is a candidate source (see East Asia below). Ust_Ishim, Kostenki14 and MA1 are NOT in this dataset.
 Mbuti	right_base	Mbuti
 Papuan	right_base	Papuan
 Papuan	right_base	PapuanHighlands
 Papuan	right_base	PapuanSepik
 Karitiana	right_base	Karitiana
-Han	right_base	Han_Chinese
 Onge	right_base	Onge
 Chukchi	right_base	Chukchi
 # (b) regional discriminators: EHG (here "EEHG") and WHG on the RIGHT help split CHG-like (Iran_N / Caucasus)
@@ -90,3 +89,9 @@ Turan_N	pool	Sarazm_EN
 BMAC	pool	BMAC
 South_Asia_BA	pool	Indus_Periphery2
 South_Asia_BA	pool	SPGT
+# ---------------- East Asia ----------------
+# Added after the ADMIXTURE/PCA exploration (scripts/explore_admixture_pca.py): the Turk sample carries ~13% of the
+# East Asian component (K6) and no other pool group carries it. Han is therefore a rotating candidate, not a fixed
+# right population (a right population that is itself the source would absorb that ancestry).
+# Northern East Asian alternatives (K6 only 72-89%, plus some K3): Buryat, Mongolian, Yakut, Xibo, Daur.
+East_Asia_Han	pool	Han_Chinese
