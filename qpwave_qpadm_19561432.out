@@ -1,0 +1,83 @@
+[20:55:28] data: /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/all_anc_mod.run3   out: /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/qpwave_qpadm_out   cores: 16   maxmem: 58982MB
+[20:55:28] step 0/3  ADMIXTURE + PCA exploration (candidate coverage check)
+
+ADMIXTURE components (K=8):
+  K1: Paniya, Abujmaria, Muria, BisonHornMaria
+  K2: Esan, Yoruba, Mende, Biaka
+  K3: Motala_HG, EEHG, Steppe_EMBA, Afanasievo
+  K4: Anatolia_N, Hungary_EN, LBK_EN, ROU_Bodrogkeresztur_ChL
+  K5: Iran_N, Turan_N, Iran_ChL, Iran_BA_SE
+  K6: She, Southern_Han_Chinese, Korean, Han
+  K7: Mendi, Marawaka, Bundi, Tari
+  K8: Karitiana, Pima, Maya, Peruvian
+
+Mean ancestry per target (components >= 5%):
+  Mod_Central_Iranian      n=46  K5=0.42, K4=0.36, K3=0.09
+  Mod_Turk                 n=1   K5=0.36, K4=0.27, K3=0.13, K6=0.13, K1=0.07
+  Mod_Zoroastrian          n=6   K5=0.45, K4=0.36, K3=0.10
+  Mod_Armenian_Assyrian    n=5   K4=0.49, K5=0.39, K3=0.06
+  Mod_Jewish_branch        n=10  K4=0.48, K5=0.40
+
+Coverage problems (target carries a component that no pool group carries):
+  none
+
+Components with no carrier in the fixed RIGHT set (covered only if a pool group rotates onto the right):
+  K5  Iran_N, Turan_N, Iran_ChL, Iran_BA_SE
+
+Nearest candidates (ADMIXTURE | PCA), top 3 each:
+  Mod_Central_Iranian      Q: Iran_BIA_NW, Armenia_EBA, Armenia_LBA_IA | PC: Iran_BIA_NW, Armenia_EBA, Armenia_LBA_IA
+  Mod_Turk                 Q: Armenia_LBA_IA, Iran_BIA_NW, BMAC | PC: Iran_ChL, Iran_BIA_NW, Armenia_LBA_IA
+  Mod_Zoroastrian          Q: Armenia_EBA, Iran_BIA_NW, Armenia_LBA_IA | PC: Iran_BIA_NW, Armenia_EBA, Armenia_LBA_IA
+  Mod_Armenian_Assyrian    Q: Armenia_N, Iran_BIA_NW, Armenia_EBA | PC: Armenia_N, Anatolia_ChL_BA, Armenia_EBA
+  Mod_Jewish_branch        Q: Armenia_N, Iran_BIA_NW, Armenia_EBA | PC: Armenia_N, Armenia_EBA, Iran_BIA_NW
+
+Heterogeneous targets (within-group SD of a component > 0.10):
+  none
+
+Likely-redundant pool pairs (Q distance < 0.08): Natufian~Levant_N (0.077)
+
+Outputs in /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/qpwave_qpadm_out/explore
+Warning messages:
+1: package ‘dplyr’ was built under R version 4.5.3 
+2: package ‘ggplot2’ was built under R version 4.5.3 
+plots written to /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/qpwave_qpadm_out/explore
+[20:55:43] step 1/3  building population-labelled .fam
+group	role	n
+Mod_Zoroastrian	target	6
+Mod_Turk	target	1
+Mod_Jewish_branch	target	10
+Mod_Armenian_Assyrian	target	5
+Mod_Central_Iranian	target	46
+Iran_N	pool	4
+Anatolia_N	pool	25
+Anatolia_ChL_BA	pool	33
+Levant_N	pool	3
+Natufian	pool	2
+Armenia_N	pool	2
+Armenia_EBA	pool	6
+Armenia_LBA_IA	pool	86
+Steppe_EMBA	pool	17
+Steppe_MLBA	pool	46
+Turan_N	pool	20
+BMAC	pool	13
+South_Asia_BA	pool	2
+East_Asia_Han	pool	103
+Mbuti	right_base	13
+Papuan	right_base	21
+Karitiana	right_base	3
+Onge	right_base	5
+Chukchi	right_base	1
+WHG	right_base	2
+EEHG	right_base	3
+[20:55:43] step 2/3  qpWave + qpAdm
+Warning messages:
+1: package ‘dplyr’ was built under R version 4.5.3 
+2: package ‘purrr’ was built under R version 4.5.3 
+[20:55:45] targets (5): Mod_Zoroastrian, Mod_Turk, Mod_Jewish_branch, Mod_Armenian_Assyrian, Mod_Central_Iranian
+[20:55:45] source pool (14): Iran_N, Anatolia_N, Anatolia_ChL_BA, Levant_N, Natufian, Armenia_N, Armenia_EBA, Armenia_LBA_IA, Steppe_EMBA, Steppe_MLBA, Turan_N, BMAC, South_Asia_BA, East_Asia_Han
+[20:55:45] fixed RIGHT (7): Mbuti, Papuan, Karitiana, Onge, Chukchi, WHG, EEHG
+[20:55:45] re-using f2 blocks in /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/qpwave_qpadm_out/f2_blocks (set FORCE_F2=1 to recompute)
+Error in FUN(X[[i]], ...) : 
+  File /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/qpwave_qpadm_out/f2_blocks/Mod_Zoroastrian/Mod_Zoroastrian_ap.rds not found! You may have to recompute the f-statistics!
+Calls: f2_from_precomp -> read_f2 -> vapply -> FUN
+Execution halted
