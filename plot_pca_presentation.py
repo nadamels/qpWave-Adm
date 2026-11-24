@@ -62,28 +62,28 @@ plt.rcParams.update({
     "svg.fonttype": "none", "pdf.fonttype": 42,
 })
 
-COL = {  # fixed, entity-based colours, matched to the original interactive PCA viewer
-    "Western-Europe": "#c80fd4", "Northern-Europe": "#eaa8f0",
-    "Eastern-Europe": "#e040e6", "Southern-Europe": "#1f0b3d",
-    "Caucasus": "#a9d4ec", "Anatolia": "#8d5b4c",
-    "Levant": "#6d7dc4", "Arabia": "#4b5b9e",
-    "Central-Asia": "#d9a900", "South-Asia": "#f58a1f",
-    "North-Africa": "#a8283a", "Africa": "#8e1b2a", "Iran": "#ff1a1a",
+COL = {  # exact colours of the interactive PCA viewer
+    "Western-Europe": "#c000db", "Northern-Europe": "#f0b5ff",
+    "Eastern-Europe": "#d200e5", "Southern-Europe": "#1b002f",
+    "Caucasus": "#d4effc", "Anatolia": "#8c564b",
+    "Levant": "#4a6795", "Arabia": "#4a6795",
+    "Central-Asia": "#E1AD01", "South-Asia": "#fb8400",
+    "North-Africa": "#960016", "Africa": "#960016", "Iran": "#ff0000",
 }
 OTHER = "#d4d7dd"  # Africa, Americas, East/SE Asia, Oceania (context only)
 # region -> (text, label x, label y, ha, colour, arrow target (x, y) or None = median of points in view)
 LABEL = {
-    "Western-Europe": ("Western Europe", -0.0040, 0.0200, "right", "#a800b8", (-0.0004, 0.0182)),
-    "Southern-Europe": ("Southern Europe", 0.0040, 0.0200, "left", "#1f0b3d", (0.0006, 0.0176)),
-    "Anatolia": ("Anatolia", 0.0048, 0.0186, "left", "#8d5b4c", (0.0012, 0.0168)),
-    "Caucasus": ("Caucasus", 0.0048, 0.0172, "left", "#4a95bd", (0.0002, 0.0155)),
-    "Northern-Europe": ("Northern\nEurope", -0.0084, 0.0166, "left", "#c070d0", (-0.0017, 0.0150)),
-    "Eastern-Europe": ("Eastern\nEurope", -0.0084, 0.0130, "left", "#b010c0", (-0.0032, 0.0121)),
+    "Western-Europe": ("Western Europe", -0.0040, 0.0200, "right", "#c000db", (-0.0004, 0.0182)),
+    "Southern-Europe": ("Southern Europe", 0.0040, 0.0200, "left", "#1b002f", (0.0006, 0.0176)),
+    "Anatolia": ("Anatolia", 0.0048, 0.0186, "left", "#8c564b", (0.0012, 0.0168)),
+    "Caucasus": ("Caucasus", 0.0048, 0.0172, "left", "#5b9bbd", (0.0002, 0.0155)),
+    "Northern-Europe": ("Northern\nEurope", -0.0084, 0.0166, "left", "#c77fe0", (-0.0017, 0.0150)),
+    "Eastern-Europe": ("Eastern\nEurope", -0.0084, 0.0130, "left", "#d200e5", (-0.0032, 0.0121)),
     "Central-Asia": ("Central Asia", -0.0092, 0.0089, "left", "#a67c00", (-0.0040, 0.0089)),
-    "South-Asia": ("South Asia", -0.0020, 0.0042, "left", "#c2610c", (-0.0031, 0.0058)),
-    "Levant": ("Levant", 0.0060, 0.0154, "left", "#4d5fb0", (0.0032, 0.0140)),
-    "Arabia": ("Arabian\nPeninsula", 0.0088, 0.0128, "left", "#3b4a8c", (0.0060, 0.0114)),
-    "North-Africa": ("North Africa", 0.0098, 0.0074, "left", "#a8283a", (0.0085, 0.0095)),
+    "South-Asia": ("South Asia", -0.0020, 0.0042, "left", "#d96f00", (-0.0031, 0.0058)),
+    "Levant": ("Levant", 0.0060, 0.0154, "left", "#4a6795", (0.0032, 0.0140)),
+    "Arabia": ("Arabian\nPeninsula", 0.0046, 0.0090, "right", "#4a6795", (0.0060, 0.0114)),
+    "North-Africa": ("North Africa", 0.0098, 0.0074, "left", "#960016", (0.0085, 0.0095)),
 }
 # Modern Iranian groups (marker shapes follow the original PCA viewer). Grouping rules:
 #   Zoroastrian            all samples labelled Zoroastrian
@@ -118,8 +118,24 @@ d.loc[~d.anc & (d.sp == "Iran"), "igroup"] = d[~d.anc & (d.sp == "Iran")].apply(
 XLIM, YLIM = (-0.0098, 0.0128), (0.0033, 0.0208)
 
 
-def size_from_age(a):  # marker area (pt^2): older = bigger
-    return 34 + 120 * np.clip(a.fillna(6000), 0, 12000) / 12000
+# Ancient samples: marker area (pt^2) by age tier -- older = much bigger.
+# Cut-offs (years BP) follow the archaeological period labels in the sample table
+# (median age: Neolithic ~7,500, Chalcolithic ~5,950, Early/Middle Bronze ~3,800-4,850, Iron Age ~2,900).
+AGE_TIERS = [  # (min age BP, legend text, marker area)
+    (7000, "Neolithic & older  (> 7,000 BP)", 640),
+    (5200, "Chalcolithic  (5,200\u20137,000)", 300),
+    (3500, "Bronze Age  (3,500\u20135,200)", 150),
+    (2500, "Iron Age  (2,500\u20133,500)", 80),
+    (0, "Historical  (< 2,500 BP)", 42),
+]
+
+
+def size_from_age(a):
+    a = a.fillna(3000)  # 4 undated samples -> Iron Age size
+    out = pd.Series(AGE_TIERS[-1][2], index=a.index, dtype=float)
+    for lo, _, sz in reversed(AGE_TIERS):
+        out[a >= lo] = sz
+    return out
 
 
 PCX, PCY = "PC1", "PC2"
@@ -135,17 +151,17 @@ def draw(ax, pcx=PCX, pcy=PCY):
         ax.scatter(g[pcx], g[pcy], s=18, c=COL[sp], alpha=.7, lw=0, zorder=2, rasterized=True)
     # ancient: larger, outlined, size = age (draw oldest first so young sit on top)
     a = anc[anc.sp.isin(COL) & (anc.sp != "Iran")].sort_values("age", ascending=False, na_position="first")
-    ax.scatter(a[pcx], a[pcy], s=size_from_age(a.age), c=a.sp.map(COL), alpha=.85,
-               edgecolor="white", lw=.9, zorder=3)
-    # ancient Iran: darker red, white outline (same outline rule as all ancients)
+    ax.scatter(a[pcx], a[pcy], s=size_from_age(a.age), c=a.sp.map(COL), alpha=.9,
+               edgecolor="black", lw=.7, zorder=3)
+    # ancient Iran: red circles, sized by age like all ancients
     ai = anc[anc.sp == "Iran"].sort_values("age", ascending=False, na_position="first")
-    ax.scatter(ai[pcx], ai[pcy], s=size_from_age(ai.age), c="#d01010", alpha=.95,
-               edgecolor="white", lw=.9, zorder=4)
+    ax.scatter(ai[pcx], ai[pcy], s=size_from_age(ai.age), c="#ff0000", alpha=.95,
+               edgecolor="black", lw=.8, zorder=4)
     # modern Iranians
     mi = mod[mod.sp == "Iran"]
     for grp, mk, sz in IRAN_GROUPS:
         g = mi[mi.igroup == grp]
-        ax.scatter(g[pcx], g[pcy], marker=mk, s=sz, c="#ff1a1a", edgecolor="#000000", lw=1,
+        ax.scatter(g[pcx], g[pcy], marker=mk, s=sz, c="#ff0000", edgecolor="#000000", lw=1,
                    zorder=6)
 
 
@@ -167,13 +183,13 @@ def finish(ax, labels=True):
                         arrowprops=dict(arrowstyle="-", color=c, lw=1, alpha=.7,
                                         shrinkA=4, shrinkB=3, relpos=(1 if ha == "right" else 0, .5)))
         ax.text(0.0018, 0.0112, "Iranians", ha="left", va="center", fontsize=22,
-                fontweight="bold", color="#d01010", zorder=10)
+                fontweight="bold", color="#e00000", zorder=10)
 
 
 def legends(fig, ax):
     # modern Iranian clusters
     mi = d[(~d.anc) & (d.sp == "Iran")]
-    h = [Line2D([], [], ls="", marker=mk, ms=10, mfc="#ff1a1a", mec="#000000", mew=1,
+    h = [Line2D([], [], ls="", marker=mk, ms=10, mfc="#ff0000", mec="#000000", mew=1,
                 label=f"{grp}  (n={int((mi.igroup == grp).sum())})") for grp, mk, _ in IRAN_GROUPS]
     l1 = ax.legend(handles=h, title="Modern Iranians", loc="upper right", frameon=False,
                    ncol=1, fontsize=12, title_fontsize=12.5, labelcolor=INK,
@@ -181,13 +197,15 @@ def legends(fig, ax):
     l1._legend_box.align = "left"; l1.get_title().set_color(MUTED)
     ax.add_artist(l1)
     # ancient vs modern + size key
-    h2 = [Line2D([], [], ls="", marker="o", ms=4, mfc="#9aa0aa", mec="none", label="Modern reference"),
-          Line2D([], [], ls="", marker="o", ms=10, mfc="#9aa0aa", mec="white", mew=1,
-                 label="Ancient (bigger = older)"),
-          Line2D([], [], ls="", marker="o", ms=10, mfc="#d01010", mec="white", mew=1,
-                 label="Ancient Iranian")]
-    l2 = ax.legend(handles=h2, loc="upper right", frameon=False, fontsize=12, labelcolor=INK,
-                   bbox_to_anchor=(1.0, 0.76), handletextpad=.4, labelspacing=.6)
+    h2 = [Line2D([], [], ls="", marker="o", ms=np.sqrt(sz), mfc="#d9d9de", mec="black", mew=.7,
+                  label=txt) for _, txt, sz in AGE_TIERS]
+    h2 += [Line2D([], [], ls="", marker="o", ms=10, mfc="#ff0000", mec="black", mew=.8,
+                  label="Ancient Iranian (same size scale)")]
+    l2 = ax.legend(handles=h2, title="Ancient samples (size = age)", loc="upper right",
+                   frameon=False, fontsize=11.5, title_fontsize=12.5, labelcolor=INK,
+                   bbox_to_anchor=(1.0, 0.74), handletextpad=.6, labelspacing=.45,
+                   borderaxespad=.4)
+    l2._legend_box.align = "left"; l2.get_title().set_color(MUTED)
     ax.add_artist(l2)
 
 
