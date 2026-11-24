@@ -47,7 +47,7 @@ save2 <- function(p, stem, w, h) {
            error = function(e) message("PNG not written for ", stem, ": ", conditionMessage(e)))
 }
 fmt_p <- function(p) ifelse(p < 0.001, "p < 0.001", sprintf("p = %.3f", p))
-seg_label <- function(d) with(d, ifelse(weight >= 0.07,
+seg_label <- function(d) with(d, ifelse(weight >= 0.10,
       ifelse(is.na(se), sprintf("%s\n%.0f%%", source, 100 * weight),
              sprintf("%s\n%.0f%% +/- %.0f", source, 100 * weight, 100 * se)), ""))
 
