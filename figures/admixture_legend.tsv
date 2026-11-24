@@ -1,0 +1,9 @@
+colour_name	hex	label	K8_component	highest_in_K8_data
+pink	#f781bf	Neolithic Iran / Turkmenistan	K5	Parkhai_Anau_EN (0.71), Ganj_Dareh_N (0.69), Shahr_I_Sokhta_BA1 (0.65), Geoksyur_EN (0.64)
+green	#4daf4a	Anatolian Neolithic farmer	K4	TUR_Marmara_Barcın_N (0.87), Anatolia_N (0.83), Iberia_EN (0.83), Hungary_EN (0.82)
+brown	#a65628	Hunter-gatherer: EEHG / WHG (also Steppe)	K3	Motala_HG (0.80), EEHG (0.73), Western_Steppe_EMBA (0.56), Afanasievo (0.54)
+purple	#984ea3	ASI (South Asian)	K1	Paniya (0.77), Abujmaria (0.74), Muria (0.74), BisonHornMaria (0.74)
+red	#e41a1c	East Asian	K6	She (0.99), Southern_Han_Chinese (0.98), Korean (0.98), Han (0.98)
+blue	#377eb8	African	K2	Esan (1.00), Yoruba (1.00), Mende (1.00), Biaka (0.99)
+orange	#ff7f00	Indigenous American (IAM)	K8	Karitiana (1.00), Quechua (0.98), Mixe (0.98), Pima (0.94)
+yellow	#ffff33	Oceanian (Papuan)	K7	Marawaka (1.00), Mendi (1.00), Bundi (1.00), Tari (1.00)
