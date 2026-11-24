@@ -1,0 +1,90 @@
+# group	role	population_label
+# role = pool       : candidate source, rotated between LEFT and RIGHT (qpAdm "rotating" strategy)
+# role = right_base : always on the RIGHT, never a source (outgroups / differential-relatedness anchors)
+# role = ignore     : parsed but not used
+# population_label  : exact value of the "Population" column in fam_meta/sample_meta.tsv.
+#                     Several rows with the same group are pooled into one population.
+#                     Edit freely: move a group between roles, add/remove labels, comment out with '#'.
+group	role	population_label
+# ---------------- RIGHT base set (never sources) ----------------
+# (a) deep / non-West-Eurasian outgroups, modelled on the "o9a"-style right set of Agranat-Tamir et al. 2020
+#     (Mbuti, Han, Papuan, Onge, Chukchi, Karitiana). Ust_Ishim, Kostenki14 and MA1 are NOT in this dataset.
+Mbuti	right_base	Mbuti
+Papuan	right_base	Papuan
+Papuan	right_base	PapuanHighlands
+Papuan	right_base	PapuanSepik
+Karitiana	right_base	Karitiana
+Han	right_base	Han_Chinese
+Onge	right_base	Onge
+Chukchi	right_base	Chukchi
+# (b) regional discriminators: EHG (here "EEHG") and WHG on the RIGHT help split CHG-like (Iran_N / Caucasus)
+#     ancestry from Anatolia_N ancestry. Keep them fixed on the right; no CHG genome is available as a source.
+WHG	right_base	WHG
+EEHG	right_base	EEHG
+# ---------------- Iran-internal ancient sources ----------------
+Iran_N	pool	Ganj_Dareh_N
+Iran_ChL	pool	IRN_HajjiFiruz_ChL
+Iran_ChL	pool	Hajji_Firuz_C
+Iran_ChL	pool	IRN_TepeHissar_ChL
+Iran_ChL	pool	Tepe_Hissar_C
+Iran_BA_SE	pool	IRN_Shahr_I_Sokhta_BA
+Iran_BA_SE	pool	Shahr_I_Sokhta_BA1
+Iran_BIA_NW	pool	IRN_Hasanlu_IA
+Iran_BIA_NW	pool	IRN_Hasanlu_MBA
+Iran_BIA_NW	pool	IRN_Hasanlu_LBA_A
+Iran_BIA_NW	pool	IRN_Hasanlu_LBA_B
+Iran_BIA_NW	pool	IRN_DinkhaTepe_BIA_A
+Iran_BIA_NW	pool	IRN_DinkhaTepe_BIA_B
+Iran_BIA_NW	pool	IRN_HajjiFiruz_BA
+Iran_BIA_NW	pool	IRN_HajjiFiruz_IA
+# ---------------- Anatolia / Levant ----------------
+Anatolia_N	pool	Anatolia_N
+Anatolia_N	pool	Anatolia_Neolithic
+Anatolia_N	pool	TUR_Marmara_Barcın_N
+Anatolia_N	pool	TUR_Marmara_Menteşe_N
+Anatolia_N	pool	TUR_Marmara_Ilıpınar_N
+Anatolia_ChL_BA	pool	TUR_Marmara_Ilıpınar_ChL
+Anatolia_ChL_BA	pool	TUR_Marmara_Barcın_ChL
+Anatolia_ChL_BA	pool	TUR_SE_Batman_ChL
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_ChL_A
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_ChL_B
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_ChL_C
+Anatolia_ChL_BA	pool	TUR_BlackSea_Amasya_EBA
+Anatolia_ChL_BA	pool	TUR_SE_Kilis_EBA_A
+Anatolia_ChL_BA	pool	TUR_Med_Isparta_BA
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_BA
+Anatolia_ChL_BA	pool	TUR_SE_Kilis_MBA
+Anatolia_ChL_BA	pool	TUR_SE_Gaziantep_BA
+Anatolia_ChL_BA	pool	TUR_Aegean_Izmir_Yassıtepe_EBA
+Anatolia_ChL_BA	pool	TUR_Aegean_Izmir_Yassitepe_MBA
+Levant_N	pool	JOR_PPNB
+Levant_N	pool	JOR_PPNC_1d.rel.I1699
+Natufian	pool	ISR_Natufian_EpiP
+# ---------------- Caucasus / Armenia ----------------
+Armenia_N	pool	ARM_Aknashen_N
+Armenia_N	pool	ARM_Masis_Blur_N
+Armenia_EBA	pool	ARM_Berkaber_KuraAraxes_EBA
+Armenia_EBA	pool	ARM_Karnut_KuraAraxes_EBA
+Armenia_LBA_IA	pool	ARM_Karashamb_LBA
+Armenia_LBA_IA	pool	ARM_Lchashen_LBA
+Armenia_LBA_IA	pool	ARM_Noratus_LBA
+Armenia_LBA_IA	pool	ARM_Nerkin_Getashen_LBA
+Armenia_LBA_IA	pool	ARM_Black_Fortress_LBA
+Armenia_LBA_IA	pool	ARM_Lori_Berd_LBA
+Armenia_LBA_IA	pool	ARM_Bagheri_Tchala_EIA
+Armenia_LBA_IA	pool	ARM_Noratus_EIA
+Armenia_LBA_IA	pool	ARM_Karashamb_EIA
+Armenia_LBA_IA	pool	ARM_Sarukhan_EIA
+Armenia_LBA_IA	pool	ARM_Karmir_Blur_EIA
+Armenia_LBA_IA	pool	ARM_Keti_EIA
+# ---------------- Steppe / Central Asia / South Asia ----------------
+Steppe_EMBA	pool	Western_Steppe_EMBA
+Steppe_EMBA	pool	Mereke_EBA_Yamnaya
+Steppe_EMBA	pool	SRB_Yamnaya_EBA
+Steppe_MLBA	pool	Western_Steppe_MLBA
+Turan_N	pool	Geoksyur_EN
+Turan_N	pool	Parkhai_Anau_EN
+Turan_N	pool	Sarazm_EN
+BMAC	pool	BMAC
+South_Asia_BA	pool	Indus_Periphery2
+South_Asia_BA	pool	SPGT
