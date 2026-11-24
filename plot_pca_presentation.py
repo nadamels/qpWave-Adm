@@ -29,10 +29,6 @@ STEM = "all_anc_mod.run3.LDpruned.pca"
 # ----------------------------------------------------------------- data
 ev = pd.read_csv(META / f"{STEM}.eigenvec", sep=r"\s+", header=None, dtype={1: str})
 ev.columns = ["FID", "IID"] + [f"PC{i}" for i in range(1, ev.shape[1] - 1)]
-val = np.loadtxt(META / f"{STEM}.eigenval")
-# Only the top-20 eigenvalues are stored, so normalise by the total variance
-# (= number of samples for standardised genotypes): 313.36/5348 = 5.86 %, 241.46/5348 = 4.51 %.
-var = val / len(ev) * 100
 tab = pd.read_excel(META / "mega_sample_table.xlsx", sheet_name="mega_table", dtype={"IID": str})
 d = ev.merge(tab, on="IID", how="left")
 d["anc"] = d["Undergone Imputation"].eq("Yes")
@@ -167,8 +163,8 @@ def draw(ax, pcx=PCX, pcy=PCY):
 
 def finish(ax, labels=True):
     ax.set_xlim(*XLIM); ax.set_ylim(*YLIM)
-    ax.set_xlabel(f"PC1  ({var[0]:.1f}% of variance)", fontsize=13, labelpad=8)
-    ax.set_ylabel(f"PC2  ({var[1]:.1f}% of variance)", fontsize=13, labelpad=8)
+    ax.set_xlabel("PC1", fontsize=13, labelpad=8)
+    ax.set_ylabel("PC2", fontsize=13, labelpad=8)
     ax.set_xticks([]); ax.set_yticks([])  # PC loadings are unitless; keep the plot calm
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
