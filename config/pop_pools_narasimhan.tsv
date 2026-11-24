@@ -1,0 +1,91 @@
+# Paper-style design, following Narasimhan et al. 2019 (Science 365, eaat7487), Supplement S4.3 "Proximal modeling".
+# Use:  DESIGN=narasimhan sbatch --export=ALL run_qpwave_qpadm.sh        (see README, section "Narasimhan-style design")
+#
+# How the paper models a population from the Copper Age onward:
+#   * RIGHT = a small FIXED set of pre-Copper-Age populations (RightAll, 8 populations). Candidate sources are NEVER rotated onto the right.
+#         RightAll = Ethiopia_4500BP, EEHG, WSHG, PPN, WEHG, Anatolia_N, Ganj_Dareh_N, ESHG
+#   * LEFT  = proximal sources close in space and time (their Table S7), up to 3 sources.
+#   * accept a model at p > 0.01 and only if every weight's 95% CI (+-2 SE) lies inside [0,1];
+#   * then "model competition": sources of a competing model are added to the right and the model is re-tested.
+# Substitutions forced by this dataset: Ethiopia_4500BP -> modern Mbuti; ESHG (Lake Baikal, not in the dataset) -> Chukchi (n=1);
+#   PPN -> Levant PPNB (JOR_PPNB; the first-degree relative JOR_PPNC_1d.rel.I1699 is left out, as the paper removes 1st/2nd-degree relatives);
+#   WSHG is a single genome here (3 in the paper).
+#
+# role = pool | right_base | ignore   (same meaning as in pop_pools.tsv)
+group	role	population_label
+# ---------------- RIGHT: pre-Copper-Age set (RightAll) ----------------
+Mbuti	right_base	Mbuti
+EEHG	right_base	EEHG
+WSHG	right_base	WSHG
+PPN	right_base	JOR_PPNB
+WHG	right_base	WHG
+Anatolia_N	right_base	Anatolia_N
+Anatolia_N	right_base	Anatolia_Neolithic
+Anatolia_N	right_base	TUR_Marmara_Barcın_N
+Anatolia_N	right_base	TUR_Marmara_Menteşe_N
+Anatolia_N	right_base	TUR_Marmara_Ilıpınar_N
+Iran_N	right_base	Ganj_Dareh_N
+Chukchi	right_base	Chukchi
+# ---------------- LEFT: proximal candidate sources (paper's Table S7 where available) ----------------
+# Iran / Turan (Table S7: Hajji_Firuz_C, Tepe_Hissar_C, Shahr_I_Sokhta_BA1, Parkhai_Anau_EN, Sarazm_EN, Geoksyur_EN, BMAC)
+Iran_ChL	pool	IRN_HajjiFiruz_ChL
+Iran_ChL	pool	Hajji_Firuz_C
+Iran_ChL	pool	IRN_TepeHissar_ChL
+Iran_ChL	pool	Tepe_Hissar_C
+Iran_BA_SE	pool	IRN_Shahr_I_Sokhta_BA
+Iran_BA_SE	pool	Shahr_I_Sokhta_BA1
+Turan_N	pool	Geoksyur_EN
+Turan_N	pool	Parkhai_Anau_EN
+Turan_N	pool	Sarazm_EN
+BMAC	pool	BMAC
+# Iron Age Iranian groups are not in the paper's source list; they stay out (as in the default design)
+Iran_BIA_NW	ignore	IRN_Hasanlu_IA
+Iran_BIA_NW	ignore	IRN_Hasanlu_MBA
+Iran_BIA_NW	ignore	IRN_Hasanlu_LBA_A
+Iran_BIA_NW	ignore	IRN_Hasanlu_LBA_B
+Iran_BIA_NW	ignore	IRN_DinkhaTepe_BIA_A
+Iran_BIA_NW	ignore	IRN_DinkhaTepe_BIA_B
+Iran_BIA_NW	ignore	IRN_HajjiFiruz_BA
+Iran_BIA_NW	ignore	IRN_HajjiFiruz_IA
+# Anatolia (Chalcolithic / Bronze Age)
+Anatolia_ChL_BA	pool	TUR_Marmara_Ilıpınar_ChL
+Anatolia_ChL_BA	pool	TUR_Marmara_Barcın_ChL
+Anatolia_ChL_BA	pool	TUR_SE_Batman_ChL
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_ChL_A
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_ChL_B
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_ChL_C
+Anatolia_ChL_BA	pool	TUR_BlackSea_Amasya_EBA
+Anatolia_ChL_BA	pool	TUR_SE_Kilis_EBA_A
+Anatolia_ChL_BA	pool	TUR_Med_Isparta_BA
+Anatolia_ChL_BA	pool	TUR_SE_Şırnak_BA
+Anatolia_ChL_BA	pool	TUR_SE_Kilis_MBA
+Anatolia_ChL_BA	pool	TUR_SE_Gaziantep_BA
+Anatolia_ChL_BA	pool	TUR_Aegean_Izmir_Yassıtepe_EBA
+Anatolia_ChL_BA	pool	TUR_Aegean_Izmir_Yassitepe_MBA
+# Caucasus (Table S7: Armenia_C, Armenia_EBA, Armenia_MBA)
+Armenia_N	pool	ARM_Aknashen_N
+Armenia_N	pool	ARM_Masis_Blur_N
+Armenia_EBA	pool	ARM_Berkaber_KuraAraxes_EBA
+Armenia_EBA	pool	ARM_Karnut_KuraAraxes_EBA
+Armenia_LBA_IA	pool	ARM_Karashamb_LBA
+Armenia_LBA_IA	pool	ARM_Lchashen_LBA
+Armenia_LBA_IA	pool	ARM_Noratus_LBA
+Armenia_LBA_IA	pool	ARM_Nerkin_Getashen_LBA
+Armenia_LBA_IA	pool	ARM_Black_Fortress_LBA
+Armenia_LBA_IA	pool	ARM_Lori_Berd_LBA
+Armenia_LBA_IA	pool	ARM_Bagheri_Tchala_EIA
+Armenia_LBA_IA	pool	ARM_Noratus_EIA
+Armenia_LBA_IA	pool	ARM_Karashamb_EIA
+Armenia_LBA_IA	pool	ARM_Sarukhan_EIA
+Armenia_LBA_IA	pool	ARM_Karmir_Blur_EIA
+Armenia_LBA_IA	pool	ARM_Keti_EIA
+# Steppe (Table S7: Western_Steppe_EMBA, Western_Steppe_MLBA)
+Steppe_EMBA	pool	Western_Steppe_EMBA
+Steppe_EMBA	pool	Mereke_EBA_Yamnaya
+Steppe_EMBA	pool	SRB_Yamnaya_EBA
+Steppe_MLBA	pool	Western_Steppe_MLBA
+# South Asia (Table S7: Indus_Periphery_Pool and SPGT are both proximal sources; here 1 + 1 individual)
+South_Asia_BA	pool	Indus_Periphery2
+South_Asia_BA	pool	SPGT
+# East Asia: modern Han as the proxy (the paper also uses present-day proxies where ancient DNA is missing)
+East_Asia_Han	pool	Han_Chinese

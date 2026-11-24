@@ -9,7 +9,7 @@ sbatch run_qpwave_qpadm.sh        # the whole analysis; results -> ../qpwave_qpa
 
 Run settings are environment variables (`MAX_SOURCES=4 PTHRESH=0.01 sbatch --export=ALL run_qpwave_qpadm.sh`):
 `BED_PREFIX` (default `all_anc_mod.run3`, all SNPs; `all_anc_mod.run3.LDpruned` also works), `PTHRESH` (0.05),
-`MIN_SOURCES` (2), `MAX_SOURCES` (3), `MIN_WEIGHT` (0.05), `TOP_N` (3), `WEIGHT_TOL` (0), `FORCE_F2` (0),
+`MIN_SOURCES` (2), `MAX_SOURCES` (3), `MIN_WEIGHT` (0.05), `TOP_N` (3), `WEIGHT_TOL` (0), `FORCE_F2` (0), `DESIGN` (default | narasimhan),
 `RUN_EXPLORE` (1), `CONDA_ENV`, `DATA_DIR`, `OUTDIR`.
 
 ## Pipeline
@@ -68,6 +68,28 @@ fewest sources, so look at `qpadm_best_by_size.tsv` (best model at each size per
 Caution: every extra source (a) adds flexibility, so a model can fit simply because it has more freedom, and (b) removes a pool population
 from the RIGHT set, which lowers the power to reject. Prefer the smallest size that fits, require every weight >= `MIN_WEIGHT`,
 check the leave-one-right-out table, and treat a 5-way "fit" with wide SEs as weak evidence.
+
+## Narasimhan-style design (opt-in): `DESIGN=narasimhan`
+Source: Narasimhan et al. 2019, *Science* 365, eaat7487, Supplementary Materials S4.2-S4.3 ("Distal" and "Proximal" modeling).
+```bash
+DESIGN=narasimhan sbatch --export=ALL run_qpwave_qpadm.sh      # results -> qpwave_qpadm_out_narasimhan/ (the default design is untouched)
+```
+| | default design (`pop_pools.tsv`) | Narasimhan-style (`pop_pools_narasimhan.tsv`) |
+|---|---|---|
+| RIGHT set | 7 fixed deep outgroups + every candidate not on the left (~17-21 populations, many closely related) | **8 fixed pre-Copper-Age populations** (paper's `RightAll`): Mbuti, EEHG, WSHG, PPN (Levant PPNB), WHG, Anatolia_N, Iran_N, Chukchi |
+| candidate sources | rotate between left and right | **never** rotate: proximal Chalcolithic/Bronze Age groups only (Iran_ChL, Iran_BA_SE, Turan_N, BMAC, Anatolia_ChL_BA, Armenia_*, Steppe_*, South_Asia_BA, East_Asia_Han) |
+| accept a model if | p >= 0.05 and weights >= `MIN_WEIGHT` | **p >= 0.01** and every weight **+-2 SE inside [0,1]** |
+| sources | 1-5 (>= `MIN_SOURCES`) | up to **3** (`MIN_SOURCES=2` kept) |
+| competition | implicit (rotation) | **model competition**: a competitor's extra sources are added to the right set and the model is re-tested; `eliminated` / `contested` / `winner` in `qpadm_all_models.tsv` |
+
+Why this matters here: the paper notes that estimating the f4 covariance with many (>25) correlated outgroups becomes unreliable and underpowered,
+and that many proximal sources "contain the necessary ancestry ingredients", so many models fit unless the right set is small and distal.
+The rotating design puts closely related proximal groups (for example Armenia_EBA and Armenia_LBA_IA) on the right together, which can make large
+groups such as Central_Iranian (n=46) fail every model. The paper also: removes 1st/2nd-degree relatives, keeps sites with >= 2 individuals, labels
+outliers with a qpAdm homogeneity test, and excludes singletons from primary analyses. Substitutions forced by this dataset: Ethiopia_4500BP -> Mbuti,
+ESHG (Lake Baikal) -> Chukchi (n=1), WSHG is 1 genome (3 in the paper). Iran_ChL and Iran_BA_SE (the paper's Hajji_Firuz_C, Tepe_Hissar_C,
+Shahr_I_Sokhta_BA1) are sources in this design even though the default design leaves them out; Iron Age Iranians stay out.
+Env switches (set by `DESIGN`, overridable): `ROTATE`, `CI_Z`, `COMPETE`, `COMPETE_MAX`, `POOLS_FILE`, `PTHRESH`, `MAX_SOURCES`, `MIN_WEIGHT`.
 
 ## Outputs (`qpwave_qpadm_out/`)
 `explore/` (ADMIXTURE/PCA: `admixture_group_profiles.png`, `pca_targets_vs_candidates.png`, `admixture_component_coverage.tsv`,

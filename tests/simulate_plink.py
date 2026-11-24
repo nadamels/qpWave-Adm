@@ -29,6 +29,7 @@ mix = lambda *a: sum(w * c for w, c in a)
 comp = {
     "Mbuti": drift(afr, .01), "Papuan": drift(ea, .08), "East_Asia_Han": drift(ea, .02), "Karitiana": drift(ea, .10),
     "Onge": drift(ea, .12), "Chukchi": drift(ea, .05), "WHG": whg, "EEHG": eehg,
+    "PPN": drift(lev, .01), "WSHG": drift(mix((.5, eehg), (.5, ea)), .02),
     "Iran_N": drift(irann, .01), "Iran_ChL": drift(mix((.7, irann), (.3, anat)), .01),
     "Iran_BA_SE": drift(mix((.6, irann), (.2, anat), (.2, ea)), .01),
     "Iran_BIA_NW": drift(mix((.55, irann), (.25, anat), (.2, steppe)), .01),

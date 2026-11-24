@@ -41,6 +41,11 @@ PTHRESH       <- as.numeric(getenv("PTHRESH", 0.05))          # qpAdm / qpWave s
 WEIGHT_TOL    <- as.numeric(getenv("WEIGHT_TOL", 0))          # weights must lie in [-tol, 1+tol]
 MAX_SOURCES   <- as.integer(getenv("MAX_SOURCES", 3))         # largest source set tried
 MIN_SOURCES   <- as.integer(getenv("MIN_SOURCES", 2))         # smallest model that may be SELECTED (1-way fits are still reported separately)
+ROTATE        <- getenv("ROTATE", "1") == "1"                 # 1: pool groups not on the LEFT move to the RIGHT (rotating qpAdm)
+                                                              # 0: RIGHT = fixed right_base set only (Narasimhan 2019 style)
+CI_Z          <- as.numeric(getenv("CI_Z", 0))                # >0: every weight +- CI_Z*SE must lie inside [0,1] (paper: 2)
+COMPETE       <- getenv("COMPETE", "0") == "1"                # model competition (needs ROTATE=0): add a competitor's extra sources to the RIGHT
+COMPETE_MAX   <- as.integer(getenv("COMPETE_MAX", 300))       # at most this many feasible models per target enter the competition
 MIN_WEIGHT    <- as.numeric(getenv("MIN_WEIGHT", 0.05))       # every source must contribute at least this much, else the model is
                                                               # really an (n-1)-source model plus noise
 TOP_N         <- as.integer(getenv("TOP_N", 3))               # models kept per target for plots/SEs
@@ -108,7 +113,7 @@ msg("qpWave (all targets jointly): rank ", paste0(joint$f4rank, " p=", signif(jo
 # ---------------------------------------- 2. qpWave screen of source sets ----
 combos <- unlist(lapply(seq_len(min(MAX_SOURCES, length(pool))),
                         function(k) combn(pool, k, simplify = FALSE)), recursive = FALSE)
-right_for <- function(left) c(right_base, setdiff(pool, left))
+right_for <- function(left) if (ROTATE) c(right_base, setdiff(pool, left)) else right_base
 msg("candidate source sets: ", length(combos), " (1..", MAX_SOURCES, " sources)")
 
 screen_one <- function(left) {
@@ -144,11 +149,58 @@ fit_model <- function(target, left, right = right_for(left)) {
 jobs <- expand_grid(target = targets, i = seq_along(combos))
 msg("qpAdm: ", nrow(jobs), " models (", length(targets), " targets x ", length(combos), " source sets)")
 res <- pmap_list(seq_len(nrow(jobs)), function(j) fit_model(jobs$target[j], combos[[jobs$i[j]]])) %>% bind_rows()
+# --- optional paper-style criterion: every weight +- CI_Z SE inside [0,1] (needs jackknife SEs, so only for models that already pass p and weights)
+res$w_lo <- NA_real_; res$w_hi <- NA_real_
+if (CI_Z > 0) {
+  cand <- which(res$p >= PTHRESH & res$feasible)
+  msg("jackknife SEs for ", length(cand), " models with p >= ", PTHRESH, " and weights in [0,1] (criterion: weight +- ", CI_Z, " SE inside [0,1])")
+  if (length(cand)) {
+    ci <- pmap_list(cand, function(i) {
+      left <- strsplit(res$left[i], "\\+")[[1]]
+      if (length(left) == 1) return(c(1, 1))
+      o <- tryCatch(qpadm(f2, left = left, right = right_for(left), target = res$target[i], verbose = FALSE), error = function(e) NULL)
+      if (is.null(o) || is.null(o$weights)) return(c(NA_real_, NA_real_))
+      c(min(o$weights$weight - CI_Z * o$weights$se), max(o$weights$weight + CI_Z * o$weights$se))
+    })
+    ci <- do.call(rbind, ci)
+    res$w_lo[cand] <- ci[, 1]; res$w_hi[cand] <- ci[, 2]
+  }
+}
+res$ci_ok <- if (CI_Z > 0) (!is.na(res$w_lo) & res$w_lo >= 0 & res$w_hi <= 1) else TRUE
 res <- res %>%
-  mutate(status = case_when(p >= PTHRESH & feasible & min_weight >= MIN_WEIGHT ~ "FEASIBLE",
-                            p >= PTHRESH & feasible                            ~ "NEGLIGIBLE_SOURCE",
-                            feasible                                           ~ "REJECTED_p",
-                            TRUE                                               ~ "INFEASIBLE_weights"))
+  mutate(status = case_when(p >= PTHRESH & feasible & min_weight >= MIN_WEIGHT & ci_ok ~ "FEASIBLE",
+                            p >= PTHRESH & feasible & min_weight >= MIN_WEIGHT          ~ "WEIGHT_CI_FAIL",
+                            p >= PTHRESH & feasible                                     ~ "NEGLIGIBLE_SOURCE",
+                            feasible                                                    ~ "REJECTED_p",
+                            TRUE                                                        ~ "INFEASIBLE_weights"))
+
+# --- optional model competition (Narasimhan 2019, S4.3): for two feasible models A and B, the sources that only B has are added to the
+# RIGHT set of A and A is re-tested. A is "eliminated" if it then fails while B survives the symmetric test; "contested" if both fail.
+res$competition <- NA_character_
+if (COMPETE && ROTATE) msg("COMPETE ignored: with ROTATE=1 every unused candidate is already on the right")
+if (COMPETE && !ROTATE) {
+  for (t in targets) {
+    fi <- which(res$target == t & res$status == "FEASIBLE" & res$nsrc >= MIN_SOURCES)
+    fi <- head(fi[order(res$nsrc[fi], -res$p[fi])], COMPETE_MAX)
+    n <- length(fi)
+    if (n < 2) { res$competition[fi] <- "winner"; next }
+    srcs <- lapply(res$left[fi], function(x) strsplit(x, "\\+")[[1]])
+    pr <- expand.grid(a = seq_len(n), b = seq_len(n)); pr <- pr[pr$a != pr$b, ]
+    pr <- pr[vapply(seq_len(nrow(pr)), function(r) length(setdiff(srcs[[pr$b[r]]], srcs[[pr$a[r]]])) > 0, NA), ]
+    msg("model competition for ", t, ": ", n, " feasible models, ", nrow(pr), " pairwise re-tests")
+    fl <- unlist(pmap_list(seq_len(nrow(pr)), function(r) {
+      A <- srcs[[pr$a[r]]]
+      f <- fit_model(t, A, c(right_for(A), setdiff(srcs[[pr$b[r]]], A)))
+      is.null(f) || !(f$p >= PTHRESH && f$feasible)
+    }))
+    Fm <- matrix(NA, n, n); Fm[cbind(pr$a, pr$b)] <- fl
+    others <- function(a) setdiff(seq_len(n), a)
+    elim   <- vapply(seq_len(n), function(a) any(vapply(others(a), function(b) isTRUE(Fm[a, b]) && !isTRUE(Fm[b, a]), NA)), NA)
+    mutual <- vapply(seq_len(n), function(a) any(vapply(others(a), function(b) isTRUE(Fm[a, b]) &&  isTRUE(Fm[b, a]), NA)), NA)
+    res$competition[fi] <- ifelse(elim, "eliminated", ifelse(mutual, "contested", "winner"))
+  }
+  msg("competition outcome: ", paste(names(table(res$competition)), table(res$competition), collapse = ", "))
+}
 write_tsv(res, file.path(OUTDIR, "qpadm_all_models.tsv"))
 msg("qpAdm done: ", sum(res$status == "FEASIBLE" & res$nsrc >= MIN_SOURCES), " feasible models with >= ", MIN_SOURCES,
     " sources (p >= ", PTHRESH, ", every weight in [", MIN_WEIGHT, ",1])")
@@ -163,7 +215,7 @@ if (nrow(one)) for (t in unique(one$target))
 # ------------------------------------------------------------ 4. selection ----
 pick_models <- function(d) {
   d <- d %>% filter(nsrc >= MIN_SOURCES)
-  feas <- d %>% filter(status == "FEASIBLE") %>% arrange(nsrc, desc(p)) %>% mutate(selection = "feasible")
+  feas <- d %>% filter(status == "FEASIBLE") %>% arrange(competition %in% "eliminated", nsrc, desc(p)) %>% mutate(selection = "feasible")
   if (nrow(feas)) return(feas)
   fb <- d %>% filter(feasible) %>% arrange(desc(p)) %>% mutate(selection = "NO_FIT_best_p_with_valid_weights")
   if (nrow(fb)) return(fb)
@@ -211,7 +263,7 @@ refit <- function(i) {
   w <- if (!is.null(o) && !is.null(o$weights)) o$weights else
     tibble(target = r$target, left = left, weight = if (length(left) == 1) 1 else NA_real_, se = NA_real_, z = NA_real_)
   tibble(target = r$target, rank = r$rank, nsrc = r$nsrc, p = r$p, chisq = r$chisq, dof = r$dof,
-         selection = r$selection, source = w$left, weight = w$weight, se = if (r$nsrc == 1) NA_real_ else w$se, z = w$z,
+         selection = r$selection, competition = r$competition, source = w$left, weight = w$weight, se = if (r$nsrc == 1) NA_real_ else w$se, z = w$z,
          right = paste(right, collapse = ","))
 }
 sel <- pmap_list(seq_len(nrow(top)), refit) %>% bind_rows()

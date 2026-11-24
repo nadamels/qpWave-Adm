@@ -8,6 +8,8 @@ suppressPackageStartupMessages({ library(dplyr); library(readr); library(tidyr);
 
 OUTDIR  <- Sys.getenv("OUTDIR"); if (OUTDIR == "") stop("set OUTDIR")
 PTHRESH <- as.numeric(ifelse(Sys.getenv("PTHRESH") == "", 0.05, Sys.getenv("PTHRESH")))
+CI_Z <- as.numeric(ifelse(Sys.getenv("CI_Z") == "", 0, Sys.getenv("CI_Z")))
+crit <- if (CI_Z > 0) sprintf("every weight +/- %g SE inside [0,1]", CI_Z) else "all weights in [0,1]"
 rd <- function(f) read_tsv(file.path(OUTDIR, f), show_col_types = FALSE)
 sel   <- rd("qpadm_selected_models.tsv")
 order <- rd("source_order.tsv")
@@ -66,7 +68,7 @@ p1 <- ggplot(best, aes(x = weight, y = target_f, fill = source)) +
   scale_x_continuous(labels = scales::percent, breaks = seq(0, 1, .25), limits = c(0, 1.32),
                      expand = expansion(mult = c(0, 0))) +
   labs(x = "Ancestry proportion", y = NULL, title = "qpAdm: best model per modern Iranian group",
-       subtitle = sprintf("simplest model with p >= %g and all weights in [0,1]; +/- = block-jackknife SE", PTHRESH)) +
+       subtitle = sprintf("simplest model with p >= %g and %s; +/- = block-jackknife SE", PTHRESH, crit)) +
   guides(fill = guide_legend(nrow = 2)) + theme_q()
 save2(p1, "qpadm_best_models", 10, 1.6 + 0.95 * length(unique(best$target)))
 

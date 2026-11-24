@@ -27,7 +27,20 @@ CONDA_ENV=${CONDA_ENV-/scratch/nme3923/conda-envs/glimpse2}   # set CONDA_ENV=""
 CONDA_ACTIVATE=${CONDA_ACTIVATE:-/share/apps/NYUAD5/miniconda/3-4.11.0/bin/activate}
 REPO_DIR=${REPO_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}}
 [[ -f $REPO_DIR/scripts/qpwave_qpadm.R ]] || REPO_DIR=$DATA_DIR/qpWave-Adm
-OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out}
+# DESIGN=default      : rotating qpAdm, p >= 0.05 (config/pop_pools.tsv)
+# DESIGN=narasimhan   : paper-style (Narasimhan et al. 2019, SM S4.3): small FIXED right set of pre-Copper-Age populations, sources never rotated
+#                       onto the right, p >= 0.01, every weight +-2 SE inside [0,1], <= 3 sources, model competition (config/pop_pools_narasimhan.tsv)
+DESIGN=${DESIGN:-default}
+case $DESIGN in
+  default)    POOLS_FILE=${POOLS_FILE:-$REPO_DIR/config/pop_pools.tsv}
+              : "${ROTATE:=1}" "${CI_Z:=0}" "${COMPETE:=0}"
+              OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out} ;;
+  narasimhan) POOLS_FILE=${POOLS_FILE:-$REPO_DIR/config/pop_pools_narasimhan.tsv}
+              : "${ROTATE:=0}" "${CI_Z:=2}" "${COMPETE:=1}" "${PTHRESH:=0.01}" "${MAX_SOURCES:=3}" "${MIN_WEIGHT:=0}"
+              OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out_narasimhan} ;;
+  *) echo "ERROR: DESIGN must be 'default' or 'narasimhan'"; exit 1 ;;
+esac
+export ROTATE CI_Z COMPETE
 # Step 0 inputs (ADMIXTURE K=8 + PCA of the LD-pruned merged data; row order = the fam given here)
 RUN_EXPLORE=${RUN_EXPLORE:-1}
 EXPLORE_FAM=${EXPLORE_FAM:-$REPO_DIR/fam_meta/all_anc_mod.run3.LDpruned.pca.fam}
@@ -61,19 +74,20 @@ command -v python3 >/dev/null  || { echo "ERROR: python3 not found"; exit 1; }
 Rscript -e 'suppressMessages(library(admixtools))' 2>/dev/null \
   || { echo "ERROR: R package 'admixtools' (ADMIXTOOLS 2) is not installed -> run on a login node: bash setup_admixtools.sh"; exit 1; }
 
-for f in "$DATA_DIR/$BED_PREFIX".{bed,bim,fam} "$REPO_DIR/fam_meta/sample_meta.tsv" "$REPO_DIR/config/pop_pools.tsv"; do
+for f in "$DATA_DIR/$BED_PREFIX".{bed,bim,fam} "$REPO_DIR/fam_meta/sample_meta.tsv" "$POOLS_FILE"; do
   [[ -s $f ]] || { echo "ERROR: missing input $f"; exit 1; }
 done
 mkdir -p "$OUTDIR/plink"
 echo "[$(date +%T)] data: $DATA_DIR/$BED_PREFIX   out: $OUTDIR   cores: $NCORES   maxmem: ${MAXMEM_MB}MB"
 
 # ---------------- provenance: the candidate pool is frozen BEFORE qpAdm is looked at ----------
-cp "$REPO_DIR/config/pop_pools.tsv" "$OUTDIR/pop_pools.used.tsv"
+cp "$POOLS_FILE" "$OUTDIR/pop_pools.used.tsv"
 {
   echo "date: $(date -Is)"; echo "git_commit: $(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || echo NA)"
   echo "git_dirty: $(git -C "$REPO_DIR" status --porcelain config scripts 2>/dev/null | wc -l) modified file(s) in config/ scripts/"
   echo "pop_pools_md5: $(md5sum "$OUTDIR/pop_pools.used.tsv" | cut -d' ' -f1)"
   echo "data: $DATA_DIR/$BED_PREFIX"
+  echo "DESIGN=$DESIGN POOLS_FILE=$POOLS_FILE ROTATE=$ROTATE CI_Z=$CI_Z COMPETE=$COMPETE"
   echo "PTHRESH=$PTHRESH MIN_SOURCES=$MIN_SOURCES MAX_SOURCES=$MAX_SOURCES MIN_WEIGHT=$MIN_WEIGHT WEIGHT_TOL=$WEIGHT_TOL TOP_N=$TOP_N"
 } > "$OUTDIR/run_info.txt"
 
@@ -81,7 +95,7 @@ cp "$REPO_DIR/config/pop_pools.tsv" "$OUTDIR/pop_pools.used.tsv"
 if [[ $RUN_EXPLORE == 1 && -s $EXPLORE_Q && -s $EXPLORE_EIGENVEC && -s $EXPLORE_FAM ]]; then
   echo "[$(date +%T)] step 0/3  ADMIXTURE + PCA exploration (candidate coverage check)"
   python3 -I "$REPO_DIR/scripts/explore_admixture_pca.py" --meta "$REPO_DIR/fam_meta/sample_meta.tsv" --fam "$EXPLORE_FAM" \
-      --pools "$REPO_DIR/config/pop_pools.tsv" --q "$EXPLORE_Q" --eigenvec "$EXPLORE_EIGENVEC" --outdir "$OUTDIR/explore" \
+      --pools "$POOLS_FILE" --q "$EXPLORE_Q" --eigenvec "$EXPLORE_EIGENVEC" --outdir "$OUTDIR/explore" \
     && OUTDIR="$OUTDIR/explore" Rscript "$REPO_DIR/scripts/plot_admixture_pca.R" \
     || echo "WARNING: exploration step failed; continuing with qpWave/qpAdm (it does not depend on it)"
 else
@@ -93,7 +107,7 @@ echo "[$(date +%T)] step 1/3  building population-labelled .fam"
 python3 -I "$REPO_DIR/scripts/make_pops.py" \
   --meta  "$REPO_DIR/fam_meta/sample_meta.tsv" \
   --fam   "$DATA_DIR/$BED_PREFIX.fam" \
-  --pools "$REPO_DIR/config/pop_pools.tsv" \
+  --pools "$POOLS_FILE" \
   --outdir "$OUTDIR"
 ln -sf "$DATA_DIR/$BED_PREFIX.bed" "$OUTDIR/plink/data.bed"     # original genotypes are never modified
 ln -sf "$DATA_DIR/$BED_PREFIX.bim" "$OUTDIR/plink/data.bim"
