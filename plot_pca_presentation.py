@@ -62,28 +62,28 @@ plt.rcParams.update({
     "svg.fonttype": "none", "pdf.fonttype": 42,
 })
 
-COL = {  # fixed, entity-based colours (cf. reference figure)
-    "Western-Europe": "#6d3fc0", "Northern-Europe": "#e3a6e8",
-    "Eastern-Europe": "#d62ea0", "Southern-Europe": "#33205e",
-    "Caucasus": "#8ecae6", "Anatolia": "#a47148",
-    "Levant": "#1fa7a8", "Arabia": "#3a5a9b",
-    "Central-Asia": "#e0a800", "South-Asia": "#f08a24",
-    "North-Africa": "#9aa0aa", "Iran": "#e11d2e",
+COL = {  # fixed, entity-based colours, matched to the original interactive PCA viewer
+    "Western-Europe": "#c80fd4", "Northern-Europe": "#eaa8f0",
+    "Eastern-Europe": "#e040e6", "Southern-Europe": "#1f0b3d",
+    "Caucasus": "#a9d4ec", "Anatolia": "#8d5b4c",
+    "Levant": "#6d7dc4", "Arabia": "#4b5b9e",
+    "Central-Asia": "#d9a900", "South-Asia": "#f58a1f",
+    "North-Africa": "#a8283a", "Africa": "#8e1b2a", "Iran": "#ff1a1a",
 }
 OTHER = "#d4d7dd"  # Africa, Americas, East/SE Asia, Oceania (context only)
 # region -> (text, label x, label y, ha, colour, arrow target (x, y) or None = median of points in view)
 LABEL = {
-    "Western-Europe": ("Western Europe", -0.0040, 0.0200, "right", "#5b2fa8", (-0.0004, 0.0182)),
-    "Southern-Europe": ("Southern Europe", 0.0040, 0.0200, "left", "#33205e", (0.0006, 0.0176)),
-    "Anatolia": ("Anatolia", 0.0048, 0.0186, "left", "#8a5a33", (0.0012, 0.0168)),
-    "Caucasus": ("Caucasus", 0.0048, 0.0172, "left", "#3f8fb5", (0.0002, 0.0155)),
-    "Northern-Europe": ("Northern\nEurope", -0.0084, 0.0166, "left", "#b46cc0", (-0.0017, 0.0150)),
-    "Eastern-Europe": ("Eastern\nEurope", -0.0084, 0.0130, "left", "#b4207f", (-0.0032, 0.0121)),
+    "Western-Europe": ("Western Europe", -0.0040, 0.0200, "right", "#a800b8", (-0.0004, 0.0182)),
+    "Southern-Europe": ("Southern Europe", 0.0040, 0.0200, "left", "#1f0b3d", (0.0006, 0.0176)),
+    "Anatolia": ("Anatolia", 0.0048, 0.0186, "left", "#8d5b4c", (0.0012, 0.0168)),
+    "Caucasus": ("Caucasus", 0.0048, 0.0172, "left", "#4a95bd", (0.0002, 0.0155)),
+    "Northern-Europe": ("Northern\nEurope", -0.0084, 0.0166, "left", "#c070d0", (-0.0017, 0.0150)),
+    "Eastern-Europe": ("Eastern\nEurope", -0.0084, 0.0130, "left", "#b010c0", (-0.0032, 0.0121)),
     "Central-Asia": ("Central Asia", -0.0092, 0.0089, "left", "#a67c00", (-0.0040, 0.0089)),
     "South-Asia": ("South Asia", -0.0020, 0.0042, "left", "#c2610c", (-0.0031, 0.0058)),
-    "Levant": ("Levant", 0.0060, 0.0154, "left", "#12807f", (0.0032, 0.0140)),
-    "Arabia": ("Arabian\nPeninsula", 0.0088, 0.0128, "left", "#3a5a9b", (0.0060, 0.0114)),
-    "North-Africa": ("North Africa", 0.0098, 0.0074, "left", "#80868f", (0.0085, 0.0095)),
+    "Levant": ("Levant", 0.0060, 0.0154, "left", "#4d5fb0", (0.0032, 0.0140)),
+    "Arabia": ("Arabian\nPeninsula", 0.0088, 0.0128, "left", "#3b4a8c", (0.0060, 0.0114)),
+    "North-Africa": ("North Africa", 0.0098, 0.0074, "left", "#a8283a", (0.0085, 0.0095)),
 }
 IRAN_CLUSTERS = {  # modern Iranians, one marker shape per empirical cluster
     "Iran_cluster_0": ("o", "Cluster 0"), "Iran_cluster_1": ("s", "Cluster 1"),
@@ -114,16 +114,16 @@ def draw(ax, pcx=PCX, pcy=PCY):
                edgecolor="white", lw=.9, zorder=3)
     # ancient Iran: darker red, white outline (same outline rule as all ancients)
     ai = anc[anc.sp == "Iran"].sort_values("age", ascending=False, na_position="first")
-    ax.scatter(ai[pcx], ai[pcy], s=size_from_age(ai.age), c="#c1121f", alpha=.95,
+    ax.scatter(ai[pcx], ai[pcy], s=size_from_age(ai.age), c="#d01010", alpha=.95,
                edgecolor="white", lw=.9, zorder=4)
     # modern Iranians
     mi = mod[mod.sp == "Iran"]
     for cl, (mk, _) in IRAN_CLUSTERS.items():
         g = mi[mi.cluster == cl]
-        ax.scatter(g[pcx], g[pcy], marker=mk, s=95 if mk != "*" else 190, c="#ff3b4a",
+        ax.scatter(g[pcx], g[pcy], marker=mk, s=95 if mk != "*" else 190, c="#ff1a1a",
                    edgecolor="#1f2430", lw=.9, zorder=6)
     g = mi[~mi.cluster.isin(IRAN_CLUSTERS)]
-    ax.scatter(g[pcx], g[pcy], marker="P", s=80, c="#ff3b4a", edgecolor="#1f2430", lw=.9, zorder=6)
+    ax.scatter(g[pcx], g[pcy], marker="P", s=80, c="#ff1a1a", edgecolor="#1f2430", lw=.9, zorder=6)
 
 
 def finish(ax, labels=True):
@@ -144,12 +144,12 @@ def finish(ax, labels=True):
                         arrowprops=dict(arrowstyle="-", color=c, lw=1, alpha=.7,
                                         shrinkA=4, shrinkB=3, relpos=(1 if ha == "right" else 0, .5)))
         ax.text(0.0018, 0.0112, "Iranians", ha="left", va="center", fontsize=22,
-                fontweight="bold", color="#b4121f", zorder=10)
+                fontweight="bold", color="#d01010", zorder=10)
 
 
 def legends(fig, ax):
     # modern Iranian clusters
-    h = [Line2D([], [], ls="", marker=m, ms=10 if m != "*" else 14, mfc="#ff3b4a",
+    h = [Line2D([], [], ls="", marker=m, ms=10 if m != "*" else 14, mfc="#ff1a1a",
                 mec=INK, mew=.9, label=l) for m, l in IRAN_CLUSTERS.values()]
     l1 = ax.legend(handles=h, title="Modern Iranians", loc="upper right", frameon=False,
                    ncol=1, fontsize=12, title_fontsize=12.5, labelcolor=INK,
@@ -160,7 +160,7 @@ def legends(fig, ax):
     h2 = [Line2D([], [], ls="", marker="o", ms=4, mfc="#9aa0aa", mec="none", label="Modern reference"),
           Line2D([], [], ls="", marker="o", ms=10, mfc="#9aa0aa", mec="white", mew=1,
                  label="Ancient (bigger = older)"),
-          Line2D([], [], ls="", marker="o", ms=10, mfc="#c1121f", mec="white", mew=1,
+          Line2D([], [], ls="", marker="o", ms=10, mfc="#d01010", mec="white", mew=1,
                  label="Ancient Iranian")]
     l2 = ax.legend(handles=h2, loc="upper right", frameon=False, fontsize=12, labelcolor=INK,
                    bbox_to_anchor=(1.0, 0.76), handletextpad=.4, labelspacing=.6)
@@ -171,12 +171,7 @@ def main():
     fig, ax = plt.subplots(figsize=(16, 9), dpi=200)
     fig.patch.set_facecolor("white")
     draw(ax); finish(ax); legends(fig, ax)
-    n_a, n_m = int(d.anc.sum()), int((~d.anc).sum())
-    fig.text(.06, .965, "Where do Iranians sit in the genetic landscape of West Eurasia?",
-             fontsize=22, fontweight="bold", ha="left", va="top")
-    fig.text(.06, .925, f"Principal component analysis of {n_m:,} modern and {n_a} ancient individuals",
-             fontsize=14, color=MUTED, ha="left", va="top")
-    fig.subplots_adjust(left=.06, right=.97, top=.89, bottom=.09)
+    fig.subplots_adjust(left=.06, right=.97, top=.97, bottom=.09)
     for ext in ("png", "svg", "pdf"):
         fig.savefig(OUT / f"pca_presentation.{ext}", facecolor="white")
     print("wrote", OUT)
