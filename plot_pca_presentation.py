@@ -85,16 +85,36 @@ LABEL = {
     "Arabia": ("Arabian\nPeninsula", 0.0088, 0.0128, "left", "#3b4a8c", (0.0060, 0.0114)),
     "North-Africa": ("North Africa", 0.0098, 0.0074, "left", "#a8283a", (0.0085, 0.0095)),
 }
-# Modern Iranians use the marker shapes of the original PCA viewer (v, X, D, P).
-# The viewer's own "Iranian group" assignment is not in the repo, so shapes are mapped onto the
-# empirical clusters of mega_sample_table.xlsx: X = cluster 0 (upper right, next to the Caucasus),
-# v = the large central group (clusters 1, 3, 4), D = cluster 2, P = no cluster assigned.
-IRAN_GROUPS = [  # (matplotlib marker, legend text, clusters or None = unassigned, marker area)
-    ("v", "Clusters 1, 3, 4", ["Iran_cluster_1", "Iran_cluster_3", "Iran_cluster_4"], 120),
-    ("X", "Cluster 0", ["Iran_cluster_0"], 130),
-    ("D", "Cluster 2", ["Iran_cluster_2"], 100),
-    ("P", "Unassigned", None, 120),
+# Modern Iranian groups (marker shapes follow the original PCA viewer). Grouping rules:
+#   Zoroastrian            all samples labelled Zoroastrian
+#   Assyrian / Armenian    Assyrian, Armenian and Assyrian_Armenian
+#   Turk                   the single Turk sample
+#   Jewish-related branch  samples labelled Jewish + IGP_19, IGP_25, IGP_57 (they sit in the same branch)
+#   Central Iranian        everyone else (incl. the 2 SGDP "Iranian" reference individuals)
+JEWISH_EXTRA = {"IGP_19", "IGP_25", "IGP_57"}
+
+
+def iran_group(row):
+    pop = row["Population"]
+    if pop == "Zoroastrian":
+        return "Zoroastrian"
+    if pop in ("Armenian", "Assyrian", "Assyrian_Armenian"):
+        return "Assyrian / Armenian"
+    if pop == "Turk":
+        return "Turk"
+    if pop == "Jewish" or row["IID"] in JEWISH_EXTRA:
+        return "Jewish-related branch"
+    return "Central Iranian"
+
+
+IRAN_GROUPS = [  # (group, matplotlib marker, marker area); drawn in this order
+    ("Central Iranian", "v", 120),
+    ("Jewish-related branch", "X", 130),
+    ("Zoroastrian", "^", 125),
+    ("Assyrian / Armenian", "s", 105),
+    ("Turk", "D", 120),
 ]
+d.loc[~d.anc & (d.sp == "Iran"), "igroup"] = d[~d.anc & (d.sp == "Iran")].apply(iran_group, axis=1)
 XLIM, YLIM = (-0.0098, 0.0128), (0.0033, 0.0208)
 
 
@@ -123,8 +143,8 @@ def draw(ax, pcx=PCX, pcy=PCY):
                edgecolor="white", lw=.9, zorder=4)
     # modern Iranians
     mi = mod[mod.sp == "Iran"]
-    for mk, _, cls, sz in IRAN_GROUPS:
-        g = mi[mi.cluster.isin(cls)] if cls else mi[mi.cluster.isna()]
+    for grp, mk, sz in IRAN_GROUPS:
+        g = mi[mi.igroup == grp]
         ax.scatter(g[pcx], g[pcy], marker=mk, s=sz, c="#ff1a1a", edgecolor="#000000", lw=1,
                    zorder=6)
 
@@ -153,11 +173,8 @@ def finish(ax, labels=True):
 def legends(fig, ax):
     # modern Iranian clusters
     mi = d[(~d.anc) & (d.sp == "Iran")]
-    h = []
-    for mk, txt, cls, _ in IRAN_GROUPS:
-        n = int((mi.cluster.isin(cls) if cls else mi.cluster.isna()).sum())
-        h.append(Line2D([], [], ls="", marker=mk, ms=10, mfc="#ff1a1a", mec="#000000", mew=1,
-                        label=f"{txt}  (n={n})"))
+    h = [Line2D([], [], ls="", marker=mk, ms=10, mfc="#ff1a1a", mec="#000000", mew=1,
+                label=f"{grp}  (n={int((mi.igroup == grp).sum())})") for grp, mk, _ in IRAN_GROUPS]
     l1 = ax.legend(handles=h, title="Modern Iranians", loc="upper right", frameon=False,
                    ncol=1, fontsize=12, title_fontsize=12.5, labelcolor=INK,
                    bbox_to_anchor=(1.0, 1.0), handletextpad=.4, labelspacing=.5)
