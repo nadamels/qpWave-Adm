@@ -44,6 +44,7 @@ export FORCE_F2=${FORCE_F2:-0}               # 1 = recompute f2 blocks
 export NCORES=${NCORES:-${SLURM_CPUS_PER_TASK:-8}}
 export MAXMEM_MB=${MAXMEM_MB:-$(( ${SLURM_MEM_PER_NODE:-64000} * 6 / 10 ))}
 export PLINK_PREFIX=$OUTDIR/plink/data OUTDIR GROUP_SUMMARY=$OUTDIR/group_summary.tsv
+export TMPDIR=${TMPDIR:-$OUTDIR/tmp}; mkdir -p "$TMPDIR"   # temp files on scratch, not in home
 export OMP_NUM_THREADS=1                     # parallelism is across models, not inside one fit
 
 # ------------------------------- environment --------------------------------

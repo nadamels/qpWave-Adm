@@ -6,6 +6,12 @@
 # (often blocked on HPC). Fallbacks: codeload tarball, or a copy you made yourself:
 #   ADMIXTOOLS_SRC=/path/to/admixtools-master.tar.gz   (or .zip, or an unpacked directory)  bash setup_admixtools.sh
 ARGS=("$@"); set --                      # conda's activate rejects positional arguments
+# Keep EVERYTHING off the (small) home directory: conda package cache, temp files and R packages go to scratch.
+SCRATCH_BASE=${SCRATCH_BASE:-/scratch/nme3923}
+export CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS:-$SCRATCH_BASE/conda-pkgs}
+export TMPDIR=${TMPDIR:-$SCRATCH_BASE/tmp}
+mkdir -p "$CONDA_PKGS_DIRS" "$TMPDIR"
+export R_LIBS_USER=/nonexistent          # never create/use ~/R; packages are installed into the conda env (on scratch)
 CONDA_ENV=${CONDA_ENV-/scratch/nme3923/conda-envs/glimpse2}
 CONDA_ACTIVATE=${CONDA_ACTIVATE:-/share/apps/NYUAD5/miniconda/3-4.11.0/bin/activate}
 if [[ -n $CONDA_ENV ]]; then
@@ -62,10 +68,10 @@ imp <- setdiff(imp[nzchar(imp)], c("stats", "utils", "graphics", "grDevices", "m
 miss <- imp[!vapply(imp, requireNamespace, logical(1), quietly = TRUE)]
 if (length(miss)) {
   cat("Installing missing dependencies from CRAN:", paste(miss, collapse = ", "), "\n")
-  tryCatch(install.packages(miss), error = function(e) NULL)
+  tryCatch(install.packages(miss, lib = .Library), error = function(e) NULL)
   miss <- imp[!vapply(imp, requireNamespace, logical(1), quietly = TRUE)]
   if (length(miss)) stop("Could not install: ", paste(miss, collapse = ", "),
                          "  -> install them with conda (conda install -c conda-forge r-<name>) and rerun")
 }
-install.packages(src, repos = NULL, type = "source")
+install.packages(src, repos = NULL, type = "source", lib = .Library)   # .Library = R library inside the conda env
 library(admixtools); cat("ADMIXTOOLS 2 installed, version", as.character(packageVersion("admixtools")), "\n")' "$SRC_DIR"
