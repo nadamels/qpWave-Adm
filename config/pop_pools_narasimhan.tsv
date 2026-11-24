@@ -8,7 +8,8 @@
 #   * accept a model at p > 0.01 and only if every weight's 95% CI (+-2 SE) lies inside [0,1];
 #   * then "model competition": sources of a competing model are added to the right and the model is re-tested.
 # Substitutions forced by this dataset: Ethiopia_4500BP -> modern Mbuti; ESHG (Lake Baikal, not in the dataset) -> Chukchi (n=1);
-#   PPN -> Levant PPNB (JOR_PPNB; the first-degree relative JOR_PPNC_1d.rel.I1699 is left out, as the paper removes 1st/2nd-degree relatives);
+#   PPN -> Levant pre-pottery Neolithic from Jordan (JOR_PPNB, 2 samples, + JOR_PPNC, 1 sample; the 'rel' in the JOR_PPNC label refers to I1699,
+#     which is not in this dataset, so there is no relative pair in the data and the sample is kept);
 #   WSHG is a single genome here (3 in the paper).
 #
 # role = pool | right_base | ignore   (same meaning as in pop_pools.tsv)
@@ -18,6 +19,7 @@ Mbuti	right_base	Mbuti
 EEHG	right_base	EEHG
 WSHG	right_base	WSHG
 PPN	right_base	JOR_PPNB
+PPN	right_base	JOR_PPNC_1d.rel.I1699
 WHG	right_base	WHG
 Anatolia_N	right_base	Anatolia_N
 Anatolia_N	right_base	Anatolia_Neolithic
