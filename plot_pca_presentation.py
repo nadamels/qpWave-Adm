@@ -70,7 +70,7 @@ OTHER = "#d4d7dd"  # Africa, Americas, East/SE Asia, Oceania (context only)
 # region -> (text, label x, label y, ha, colour, arrow target (x, y) or None = median of points in view)
 LABEL = {
     "Western-Europe": ("Western Europe", -0.0040, 0.0200, "right", "#c000db", (-0.0004, 0.0182)),
-    "Southern-Europe": ("Southern Europe", 0.0040, 0.0200, "left", "#1b002f", (0.0006, 0.0176)),
+    "Southern-Europe": ("Southern Europe", 0.0054, 0.0200, "left", "#1b002f", (0.0006, 0.0176)),
     "Anatolia": ("Anatolia", 0.0048, 0.0186, "left", "#8c564b", (0.0012, 0.0168)),
     "Caucasus": ("Caucasus", 0.0048, 0.0172, "left", "#5b9bbd", (0.0002, 0.0155)),
     "Northern-Europe": ("Northern\nEurope", -0.0084, 0.0166, "left", "#c77fe0", (-0.0017, 0.0150)),
@@ -79,7 +79,7 @@ LABEL = {
     "South-Asia": ("South Asia", -0.0020, 0.0042, "left", "#d96f00", (-0.0031, 0.0058)),
     "Levant": ("Levant", 0.0060, 0.0154, "left", "#4a6795", (0.0032, 0.0140)),
     "Arabia": ("Arabian\nPeninsula", 0.0046, 0.0090, "right", "#4a6795", (0.0060, 0.0114)),
-    "North-Africa": ("North Africa", 0.0098, 0.0074, "left", "#960016", (0.0085, 0.0095)),
+    "North-Africa": ("North Africa", 0.0122, 0.0074, "left", "#960016", (0.0085, 0.0095)),
 }
 # Modern Iranian groups (marker shapes follow the original PCA viewer). Grouping rules:
 #   Zoroastrian            all samples labelled Zoroastrian
@@ -104,11 +104,11 @@ def iran_group(row):
 
 
 IRAN_GROUPS = [  # (group, matplotlib marker, marker area); drawn in this order
-    ("Central Iranian", "v", 120),
-    ("Jewish-related branch", "X", 130),
-    ("Zoroastrian", "^", 125),
-    ("Assyrian / Armenian", "s", 105),
-    ("Turk", "D", 120),
+    ("Central Iranian", "v", 95),
+    ("Jewish-related branch", "X", 105),
+    ("Zoroastrian", "^", 100),
+    ("Assyrian / Armenian", "s", 85),
+    ("Turk", "D", 95),
 ]
 d.loc[~d.anc & (d.sp == "Iran"), "igroup"] = d[~d.anc & (d.sp == "Iran")].apply(iran_group, axis=1)
 XLIM, YLIM = (-0.0098, 0.0128), (0.0033, 0.0208)
@@ -118,11 +118,11 @@ XLIM, YLIM = (-0.0098, 0.0128), (0.0033, 0.0208)
 # Cut-offs (years BP) follow the archaeological period labels in the sample table
 # (median age: Neolithic ~7,500, Chalcolithic ~5,950, Early/Middle Bronze ~3,800-4,850, Iron Age ~2,900).
 AGE_TIERS = [  # (min age BP, legend text, marker area)
-    (7000, "Neolithic & older  (> 7,000 BP)", 640),
-    (5200, "Chalcolithic  (5,200\u20137,000)", 300),
-    (3500, "Bronze Age  (3,500\u20135,200)", 150),
-    (2500, "Iron Age  (2,500\u20133,500)", 80),
-    (0, "Historical  (< 2,500 BP)", 42),
+    (7000, "Neolithic & older  (> 7,000 BP)", 430),
+    (5200, "Chalcolithic  (5,200\u20137,000)", 210),
+    (3500, "Bronze Age  (3,500\u20135,200)", 105),
+    (2500, "Iron Age  (2,500\u20133,500)", 58),
+    (0, "Historical  (< 2,500 BP)", 32),
 ]
 
 
@@ -134,6 +134,7 @@ def size_from_age(a):
     return out
 
 
+LINE_SCALE = 0.5  # fraction of the original label-to-group distance (shorter leader lines)
 PCX, PCY = "PC1", "PC2"
 
 
@@ -144,7 +145,7 @@ def draw(ax, pcx=PCX, pcy=PCY):
     ax.scatter(ctx[pcx], ctx[pcy], s=8, c=OTHER, alpha=.6, lw=0, zorder=1, rasterized=True)
     # modern reference, small translucent dots
     for sp, g in mod[mod.sp.isin(COL) & (mod.sp != "Iran")].groupby("sp"):
-        ax.scatter(g[pcx], g[pcy], s=18, c=COL[sp], alpha=.7, lw=0, zorder=2, rasterized=True)
+        ax.scatter(g[pcx], g[pcy], s=13, c=COL[sp], alpha=.7, lw=0, zorder=2, rasterized=True)
     # ancient: larger, outlined, size = age (draw oldest first so young sit on top)
     a = anc[anc.sp.isin(COL) & (anc.sp != "Iran")].sort_values("age", ascending=False, na_position="first")
     ax.scatter(a[pcx], a[pcy], s=size_from_age(a.age), c=a.sp.map(COL), alpha=.9,
@@ -174,6 +175,7 @@ def finish(ax, labels=True):
             if tgt is None:
                 g = vis[(vis.sp == sp) & ~vis.anc]
                 tgt = (g[PCX].median(), g[PCY].median())
+            x, y = tgt[0] + LINE_SCALE * (x - tgt[0]), tgt[1] + LINE_SCALE * (y - tgt[1])
             ax.annotate(txt, xy=tgt, xytext=(x, y), ha=ha, va="center", fontsize=15,
                         fontweight="semibold", color=c, zorder=10, linespacing=.95,
                         arrowprops=dict(arrowstyle="-", color=c, lw=1, alpha=.7,
