@@ -105,6 +105,13 @@ Limits: group-level, not individual-level outlier detection; single-individual s
 Validation on simulated data: homogeneous groups gave 5 of 290 pairs rejected (1.7%), and three deliberately lumped distinct groups were rejected in 3 of 3 pairs.
 This test did not exist when the first results were produced, so those results were obtained without it.
 
+## PSMC plot (unrelated to the qpAdm pipeline)
+`Rscript scripts/plot_psmc.R psmc figures [g=25] [mu=1.25e-8] [s=100]` reads the last iteration of every `psmc/*.psmc`, rescales it as `psmc_plot.pl` does
+(`N0 = theta0 / (4 mu s)`, years = `2 N0 t g`), assigns each sample to one of the five target groups through `scripts/make_pops.py`, and writes
+`figures/psmc_by_subpopulation.png|pdf` (thin lines = individuals, thick lines = group median) plus the curves as TSV.
+**Check g, mu and s before interpreting absolute values:** with s=100 the present-day scale is N0 ~ 1,300, ten times lower than expected for humans, so the bin size
+used to make the .psmcfa files (or the mutation rate) is probably different; the curve shapes do not change, only the axes.
+
 ## Outputs (`qpwave_qpadm_out/`)
 `explore/` (ADMIXTURE/PCA: `admixture_group_profiles.png`, `pca_targets_vs_candidates.png`, `admixture_component_coverage.tsv`,
 `admixture_pca_candidate_screen.tsv`, `admixture_pool_redundancy.tsv`, …) · `qpwave_targets_pairwise.tsv|png` · `qpwave_targets_joint_rank.tsv` ·
