@@ -1,0 +1,44 @@
+# Distal design WITH steppe pastoralist sources (opt-in variant of config/pop_pools_distal.tsv).
+# Use:  DESIGN=distal POOLS_FILE=$PWD/config/pop_pools_distal_steppe.tsv OUTDIR=$DATA/qpwave_qpadm_out_distal_steppe sbatch --export=ALL run_qpwave_qpadm.sh
+#
+# Why: the plain distal pool has only EEHG as an EHG-related source. Bronze Age steppe groups (Yamnaya, Srubnaya/Sintashta/Corded Ware) are
+# EEHG + Caucasus/Iran-related ancestry (Steppe_EMBA) or those plus Anatolian farmer ancestry (Steppe_MLBA), so modern Iranians with a
+# 'steppe' signal could take it from a steppe source instead of EEHG. Here the steppe groups are ADDED to the rotated pool and the data choose.
+#   Steppe_EMBA = Western_Steppe_EMBA (n=15) + Mereke_EBA_Yamnaya + SRB_Yamnaya_EBA
+#   Steppe_MLBA = Western_Steppe_MLBA (n=46) + Srubnaya (n=2, Mathieson 2015; ADMIXTURE profile identical to Western_Steppe_MLBA)
+# CAVEATS: (1) these are NOT pre-Copper-Age, so this is a mixed-depth (distal + proximal) model; read it as 'is the EEHG-like share better
+#   carried by a steppe population?'. (2) Steppe_MLBA is itself a mixture of EEHG, Iran_N-like and Anatolia_N, so it is nearly collinear with
+#   combinations of other pool members; the qpWave source screen drops sets that are not independent and the rotation puts un-chosen steppe
+#   groups on the RIGHT, which can reject models (a steppe-rich right set vs EEHG left). Compare with the plain distal run, never merge them.
+#   (3) Srubnaya alone has n=2, so it is pooled into Steppe_MLBA instead of being its own source.
+#
+# role = pool | right_base | ignore
+group	role	population_label
+# ---------------- fixed RIGHT outgroups ----------------
+Mbuti	right_base	Mbuti
+Papuan	right_base	Papuan
+Papuan	right_base	PapuanHighlands
+Papuan	right_base	PapuanSepik
+Karitiana	right_base	Karitiana
+Chukchi	right_base	Chukchi
+# ---------------- distal pool (rotated between left and right) ----------------
+Anatolia_N	pool	Anatolia_N
+Anatolia_N	pool	Anatolia_Neolithic
+Anatolia_N	pool	TUR_Marmara_Barcın_N
+Anatolia_N	pool	TUR_Marmara_Menteşe_N
+Anatolia_N	pool	TUR_Marmara_Ilıpınar_N
+Iran_N	pool	Ganj_Dareh_N
+WHG	pool	WHG
+EEHG	pool	EEHG
+WSHG	pool	WSHG
+Onge	pool	Onge
+East_Asia_Han	pool	Han_Chinese
+PPN	pool	JOR_PPNB
+PPN	pool	JOR_PPNC_1d.rel.I1699
+Natufian	pool	ISR_Natufian_EpiP
+# ---------------- steppe pastoralists (added) ----------------
+Steppe_EMBA	pool	Western_Steppe_EMBA
+Steppe_EMBA	pool	Mereke_EBA_Yamnaya
+Steppe_EMBA	pool	SRB_Yamnaya_EBA
+Steppe_MLBA	pool	Western_Steppe_MLBA
+Steppe_MLBA	pool	Srubnaya

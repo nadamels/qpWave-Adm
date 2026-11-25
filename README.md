@@ -105,6 +105,15 @@ Differences from the paper: no Upper Paleolithic outgroups (Ust_Ishim, Tianyuan,
 separated cleanly; Lake Baikal ESHG is replaced by modern Han; WSHG and Onge are small groups. Motala_HG is left out (a WHG + EEHG mixture; add it in `config/pop_pools_distal.tsv` to try).
 The homogeneity step is off by default here (4 fixed outgroups give it little power); use the paper-style run's homogeneity results.
 
+## Steppe sources instead of / next to EEHG (opt-in): `config/pop_pools_distal_steppe.tsv`
+The plain distal pool has EEHG as its only EHG-related source. This variant adds `Steppe_EMBA` (Western_Steppe_EMBA, Yamnaya) and `Steppe_MLBA`
+(Western_Steppe_MLBA + Srubnaya, n=2, pooled because its ADMIXTURE profile equals the larger group's) to the rotated pool, so the data choose
+between EEHG and a steppe population. These are not pre-Copper-Age and `Steppe_MLBA` is itself EEHG + Iran_N + Anatolia_N, so treat it as a mixed-depth
+sensitivity check, compare it with the plain distal run and never merge the two.
+```bash
+DESIGN=distal POOLS_FILE=$PWD/config/pop_pools_distal_steppe.tsv OUTDIR=$DATA/qpwave_qpadm_out_distal_steppe sbatch --cpus-per-task=4 --mem=24G --time=02:00:00 --export=ALL run_qpwave_qpadm.sh
+```
+
 ## Ancient Iranians as targets (opt-in): `DESIGN=ancient_iran_distal`
 Models the ancient Iranians in the dataset (Chalcolithic, Bronze Age, Iron Age) with the distal design, which is how Narasimhan et al. 2019 model ancient Copper Age and later populations.
 Targets come from the config file (`--targets config`, role `target`), grouped by site and period: Iran_ChL_HajjiFiruz (3), Iran_ChL_TepeHissar (7), Iran_BA_ShahrISokhta_BA1 (4),
