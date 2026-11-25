@@ -28,6 +28,8 @@ CONDA_ACTIVATE=${CONDA_ACTIVATE:-/share/apps/NYUAD5/miniconda/3-4.11.0/bin/activ
 REPO_DIR=${REPO_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}}
 [[ -f $REPO_DIR/scripts/qpwave_qpadm.R ]] || REPO_DIR=$DATA_DIR/qpWave-Adm
 # DESIGN=default      : rotating qpAdm, p >= 0.05 (config/pop_pools.tsv)
+# DESIGN=distal       : ancient pre-Copper-Age components (Anatolia_N, Iran_N, WHG, EEHG, WSHG, Onge, Han, PPN, Natufian) as sources, rotated between left and
+#                       right (Narasimhan 2019 SM S4.2.4); p >= 0.01, every weight +-2 SE inside [0,1], up to 4 sources (config/pop_pools_distal.tsv)
 # DESIGN=narasimhan   : paper-style (Narasimhan et al. 2019, SM S4.3): small FIXED right set of pre-Copper-Age populations, sources never rotated
 #                       onto the right, p >= 0.01, every weight +-2 SE inside [0,1], <= 3 sources, model competition (config/pop_pools_narasimhan.tsv)
 DESIGN=${DESIGN:-default}
@@ -38,7 +40,10 @@ case $DESIGN in
   narasimhan) POOLS_FILE=${POOLS_FILE:-$REPO_DIR/config/pop_pools_narasimhan.tsv}
               : "${ROTATE:=0}" "${CI_Z:=2}" "${COMPETE:=1}" "${PTHRESH:=0.01}" "${MAX_SOURCES:=3}" "${MIN_WEIGHT:=0}"
               OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out_narasimhan} ;;
-  *) echo "ERROR: DESIGN must be 'default' or 'narasimhan'"; exit 1 ;;
+  distal)     POOLS_FILE=${POOLS_FILE:-$REPO_DIR/config/pop_pools_distal.tsv}
+              : "${ROTATE:=1}" "${CI_Z:=2}" "${COMPETE:=0}" "${PTHRESH:=0.01}" "${MAX_SOURCES:=4}" "${MIN_WEIGHT:=0}" "${RUN_HOMOGENEITY:=0}"
+              OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out_distal} ;;
+  *) echo "ERROR: DESIGN must be 'default', 'narasimhan' or 'distal'"; exit 1 ;;
 esac
 export ROTATE CI_Z COMPETE
 # Step 0 inputs (ADMIXTURE K=8 + PCA of the LD-pruned merged data; row order = the fam given here)

@@ -9,7 +9,7 @@ sbatch run_qpwave_qpadm.sh        # the whole analysis; results -> ../qpwave_qpa
 
 Run settings are environment variables (`MAX_SOURCES=4 PTHRESH=0.01 sbatch --export=ALL run_qpwave_qpadm.sh`):
 `BED_PREFIX` (default `all_anc_mod.run3`, all SNPs; `all_anc_mod.run3.LDpruned` also works), `PTHRESH` (0.05),
-`MIN_SOURCES` (2), `MAX_SOURCES` (3), `MIN_WEIGHT` (0.05), `TOP_N` (3), `WEIGHT_TOL` (0), `FORCE_F2` (0), `DESIGN` (default | narasimhan),
+`MIN_SOURCES` (2), `MAX_SOURCES` (3), `MIN_WEIGHT` (0.05), `TOP_N` (3), `WEIGHT_TOL` (0), `FORCE_F2` (0), `DESIGN` (default | narasimhan | distal),
 `RUN_EXPLORE` (1), `CONDA_ENV`, `DATA_DIR`, `OUTDIR`.
 
 ## Pipeline
@@ -92,6 +92,18 @@ Shahr_I_Sokhta_BA1) are sources in this design even though the default design le
 Sensitivity variant `config/pop_pools_narasimhan_deepright.tsv` = the same plus Onge, Papuan and Karitiana on the right (run with
 `DESIGN=narasimhan POOLS_FILE=$PWD/config/pop_pools_narasimhan_deepright.tsv OUTDIR=<new folder>`); it tests whether the Han weights are an artefact of the small right set.
 Env switches (set by `DESIGN`, overridable): `ROTATE`, `CI_Z`, `COMPETE`, `COMPETE_MAX`, `POOLS_FILE`, `PTHRESH`, `MAX_SOURCES`, `MIN_WEIGHT`.
+
+## Distal design (opt-in): `DESIGN=distal`
+Source: Narasimhan et al. 2019 SM S4.2.4. Each modern group is modelled as a mixture of **ancient pre-Copper-Age ancestry components**, not of nearby Bronze Age groups.
+Pool (rotated between left and right, the paper's `RightDistal` procedure): Anatolia_N, Iran_N (Ganj_Dareh), WHG, EEHG, WSHG (1 genome), Onge (AASI proxy), East_Asia_Han (ESHG proxy),
+PPN (Levant, JOR_PPNB + JOR_PPNC), Natufian. Fixed outgroups: Mbuti (for Ethiopia_4500BP), Papuan, Karitiana (ANE-related stand-in), Chukchi. Acceptance: p >= 0.01 and every
+weight +-2 SE inside [0,1]; up to 4 sources (`MAX_SOURCES=5` allowed; the paper finds Bronze Age and later groups often need >= 4).
+```bash
+DESIGN=distal NCORES=4 MAXMEM_MB=8000 nohup bash run_qpwave_qpadm.sh > qpwave_distal.log 2>&1 &    # results -> qpwave_qpadm_out_distal/
+```
+Differences from the paper: no Upper Paleolithic outgroups (Ust_Ishim, Tianyuan, ANE/MA1, Villabruna) exist in this dataset, so the right set is weaker and ANE-related ancestry cannot be
+separated cleanly; Lake Baikal ESHG is replaced by modern Han; WSHG and Onge are small groups. Motala_HG is left out (a WHG + EEHG mixture; add it in `config/pop_pools_distal.tsv` to try).
+The homogeneity step is off by default here (4 fixed outgroups give it little power); use the paper-style run's homogeneity results.
 
 ## Homogeneity QC of the pooled groups (step 2b, on by default; `RUN_HOMOGENEITY=0` skips it)
 Pooled sources (e.g. Armenia_LBA_IA, 86 individuals) and target groups must be internally consistent, otherwise "one source" is really a mixture of

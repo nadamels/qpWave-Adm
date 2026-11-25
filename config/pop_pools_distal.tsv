@@ -1,0 +1,40 @@
+# Distal design, following Narasimhan et al. 2019, Supplementary Materials S4.2.4 ("Distal modeling of each group from the Copper Age onward").
+# Use:  DESIGN=distal sbatch --export=ALL run_qpwave_qpadm.sh        (or: DESIGN=distal nohup bash run_qpwave_qpadm.sh ...)
+#
+# Idea: model each modern group as a mixture of ANCIENT, PRE-COPPER-AGE ancestry components (the paper says Bronze Age and later groups
+# often need a minimum of 4). Every pool population is rotated between LEFT and RIGHT (all subsets of N pool populations go left, the rest
+# go right, plus the fixed outgroups), the paper's RightDistal procedure. Accept at p >= 0.01 with every weight +-2 SE inside [0,1].
+#
+# The paper's distal source set -> this dataset:
+#   Anatolia_N -> Anatolia_N | Ganj_Dareh_N -> Iran_N | WEHG -> WHG | EEHG -> EEHG | WSHG -> WSHG (1 genome here, 3 in the paper)
+#   AHG (Andamanese, AASI proxy) -> Onge | ESHG (Lake Baikal) -> not in the dataset; modern Han is used as the East Asian-related proxy
+#   PPN -> Levant pre-pottery Neolithic (JOR_PPNB + JOR_PPNC; the 'rel' in the PPNC label refers to I1699, which is not in the data) | Natufian -> Natufian
+# Fixed outgroups: Ethiopia_4500BP -> modern Mbuti. The paper also fixes Upper Paleolithic genomes (Ust_Ishim, Tianyuan, ANE/MA1, Villabruna): they are
+#   NOT in this dataset, so this right set is weaker; Karitiana (about 40% ANE-related) and Chukchi (ANE + East Asian) are the nearest stand-ins for the ANE side.
+# Motala_HG (Scandinavian hunter-gatherers, largely WHG + EEHG) is left out: it is a mixture of two pool members and would be dropped by the qpWave screen.
+#   To try it, add a row "Motala_HG<TAB>pool<TAB>Motala_HG".
+#
+# role = pool | right_base | ignore
+group	role	population_label
+# ---------------- fixed RIGHT outgroups ----------------
+Mbuti	right_base	Mbuti
+Papuan	right_base	Papuan
+Papuan	right_base	PapuanHighlands
+Papuan	right_base	PapuanSepik
+Karitiana	right_base	Karitiana
+Chukchi	right_base	Chukchi
+# ---------------- distal pool (rotated between left and right) ----------------
+Anatolia_N	pool	Anatolia_N
+Anatolia_N	pool	Anatolia_Neolithic
+Anatolia_N	pool	TUR_Marmara_Barcın_N
+Anatolia_N	pool	TUR_Marmara_Menteşe_N
+Anatolia_N	pool	TUR_Marmara_Ilıpınar_N
+Iran_N	pool	Ganj_Dareh_N
+WHG	pool	WHG
+EEHG	pool	EEHG
+WSHG	pool	WSHG
+Onge	pool	Onge
+East_Asia_Han	pool	Han_Chinese
+PPN	pool	JOR_PPNB
+PPN	pool	JOR_PPNC_1d.rel.I1699
+Natufian	pool	ISR_Natufian_EpiP
