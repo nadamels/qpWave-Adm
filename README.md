@@ -1,5 +1,7 @@
 # qpWave / qpAdm for modern Iranian sub-populations
 
+> IBD-based clustering + painting/NNLS ancestry modelling (IBDseq output → Leiden clusters → `limSolve`) lives in [`README_ibd.md`](README_ibd.md) (`run_ibd_ancestry.sh`).
+
 ```bash
 cd /scratch/nme3923/IranGen/modern_anc_unfilt_PLUS54/merged_datasets/ancient_modern_all/qpWave-Adm
 git pull

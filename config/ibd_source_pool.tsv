@@ -1,0 +1,8 @@
+# Candidate source groups for the enumeration mode of scripts/ibd_04_nnls.R (every combination of 1..MAX_SOURCES of these
+# is fitted for every Mod_* target, then ranked by residual sum of squares). One group per line; a line starting with ~ is a
+# regular expression matched against all group names (ancient cluster names or modern groups). Lines starting with # are comments.
+# Fill this in AFTER the clustering step (see <OUTDIR>/ibd_cluster_summary.tsv). Examples (commented out):
+#   Iran_N_c1-3
+#   Anatolia_N_c1-1
+#   ~^Steppe_
+#   Han_Chinese

@@ -1,0 +1,8 @@
+# Explicit IBD-painting NNLS models (scripts/ibd_04_nnls.R). Tab separated, header required.
+#   target  = a group (Mod_Zoroastrian, an ancient cluster name from <OUTDIR>/ibd_cluster_summary.tsv, a modern donor group) or a single IID
+#   sources = comma separated groups (cluster names are produced by the clustering step, so fill this in AFTER step "cluster")
+#   model_id (optional column) = label
+# Example rows (commented out):
+#   Mod_Central_Iranian	Iran_N_c1-3,Anatolia_N_c1-1,Steppe_EMBA_c1-4
+#   Mod_Turk	Iran_N_c1-3,Han_Chinese
+model_id	target	sources

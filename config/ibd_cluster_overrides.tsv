@@ -1,0 +1,8 @@
+# Manual overrides of the automatic spatiotemporal collapse of the IBD cluster hierarchy (scripts/ibd_02_cluster.R).
+# Look at <OUTDIR>/ibd_cluster_hierarchy_nodes.tsv for node paths, sizes, populations, date and distance spans.
+#   cluster_name = a name      -> everything under that node becomes ONE cluster with this name
+#   cluster_name = SPLIT       -> do not collapse this node even if it passes the date/distance rule: descend into its children
+# Tab separated, header required. Example rows (commented out):
+#   1.2	Armenia_BronzeAge
+#   1.4	SPLIT
+node_path	cluster_name
