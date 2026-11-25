@@ -63,7 +63,7 @@ p <- ggplot() +
   geom_rect(data = sg %>% filter(!is.na(sd_mid)), aes(xmin = mean_mid - sd0, xmax = mean_mid + sd0, ymin = y - 0.42, ymax = y + 0.42, fill = group), alpha = 0.16) +
   geom_segment(data = sg, aes(x = mean_mid, xend = mean_mid, y = y - 0.42, yend = y + 0.42, colour = group), linewidth = 0.9) +
   geom_segment(data = d, aes(x = older, xend = younger, y = y, yend = y, colour = group, linetype = kind), linewidth = 1.1, lineend = "butt", alpha = 0.85) +
-  geom_point(data = d, aes(x = mid, y = y, colour = group), size = 1.1, shape = 21, fill = "#fcfcfb", stroke = 0.7) +
+  geom_point(data = d, aes(x = mid, y = y, colour = group), size = 1.1, shape = 21, fill = "white", stroke = 0.7) +
   scale_colour_manual(values = cols, guide = "none") + scale_fill_manual(values = cols, guide = "none") +
   scale_linetype_manual(values = c("radiocarbon (95% calibrated interval)" = "solid", "archaeological context range" = "22"), name = NULL) +
   scale_x_continuous(breaks = seq(-6000, -500, 500), labels = function(x) abs(x), expand = expansion(mult = c(0.01, 0.01))) +
@@ -71,10 +71,10 @@ p <- ggplot() +
   labs(x = "Years BCE (calibrated)", y = NULL, title = "Archaeological dates of the ancient Iranian target groups",
        subtitle = "bars = individual intervals (dots = midpoints); line = group mean; band = mean +/- 1 SD across individuals") +
   theme_minimal(base_size = 9) +
-  theme(plot.background = element_rect(fill = "#fcfcfb", colour = NA), panel.background = element_rect(fill = "#fcfcfb", colour = NA),
+  theme(plot.background = element_rect(fill = "white", colour = NA), panel.background = element_rect(fill = "white", colour = NA),
         text = element_text(colour = ink), axis.text = element_text(colour = ink2), axis.text.y = element_text(colour = ink, hjust = 0, size = 7.5, lineheight = 0.95),
-        panel.grid.major.y = element_line(colour = "#efeeea", linewidth = 0.3), panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_line(colour = "#e6e5e1", linewidth = 0.4), legend.position = "bottom", legend.key.width = unit(1.4, "lines"),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.line.x = element_line(colour = ink, linewidth = 0.4), axis.ticks.x = element_line(colour = ink, linewidth = 0.4), axis.ticks.length.x = unit(3, "pt"), legend.position = "bottom", legend.key.width = unit(1.4, "lines"),
         legend.margin = margin(0, 0, 0, 0), plot.title.position = "plot", plot.title = element_text(face = "bold", size = 11),
         plot.subtitle = element_text(colour = ink2, size = 8), plot.margin = margin(6, 10, 4, 6))
 ggsave(file.path(OUT, "ancient_iran_dates.pdf"), p, width = 8.2, height = 3.9)
