@@ -27,6 +27,9 @@ def main():
     ap.add_argument("--fam", required=True)
     ap.add_argument("--pools", required=True)
     ap.add_argument("--outdir", required=True)
+    ap.add_argument("--sublabels", action="store_true",
+                    help="also write plink_sub/data.fam + sample_subgroups.tsv: target/pool groups split into sub-labels "
+                         "(published label x sampling region) for the homogeneity test")
     ap.add_argument("--keep-ignored", action="store_true",
                     help="also label groups whose role is 'ignore' (used only by explore_admixture_pca.py)")
     a = ap.parse_args()
@@ -111,6 +114,23 @@ def main():
             if g:
                 out.write(f"{r[1]}\t{g}\t{role_of[g]}\t{meta[r[1]]['Population']}\n")
 
+    if a.sublabels:
+        import re
+        san = lambda x: re.sub(r"[^A-Za-z0-9]+", "_", x).strip("_")
+        os.makedirs(os.path.join(a.outdir, "plink_sub"), exist_ok=True)
+        with open(os.path.join(a.outdir, "plink_sub", "data.fam"), "w") as out, \
+             open(os.path.join(a.outdir, "sample_subgroups.tsv"), "w") as tab:
+            tab.write("IID\tgroup\trole\tsublabel\tpopulation_label\tsuper_population\n")
+            for r in fam:
+                g = assign.get(r[1])
+                if g is None or role_of[g] == "ignore":
+                    fid = "unused"
+                elif role_of[g] in ("target", "pool"):
+                    fid = f"{g}__{san(meta[r[1]]['Population'])}__{san(meta[r[1]]['Super-population'])}"
+                    tab.write(f"{r[1]}\t{g}\t{role_of[g]}\t{fid}\t{meta[r[1]]['Population']}\t{meta[r[1]]['Super-population']}\n")
+                else:
+                    fid = g
+                out.write(" ".join([fid] + r[1:]) + "\n")
     n = Counter(assign.values())
     TGT_ORDER = ["Mod_Zoroastrian", "Mod_Turk", "Mod_Jewish_branch", "Mod_Armenian_Assyrian", "Mod_Central_Iranian"]
 

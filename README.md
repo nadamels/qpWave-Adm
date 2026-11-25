@@ -93,6 +93,18 @@ Sensitivity variant `config/pop_pools_narasimhan_deepright.tsv` = the same plus 
 `DESIGN=narasimhan POOLS_FILE=$PWD/config/pop_pools_narasimhan_deepright.tsv OUTDIR=<new folder>`); it tests whether the Han weights are an artefact of the small right set.
 Env switches (set by `DESIGN`, overridable): `ROTATE`, `CI_Z`, `COMPETE`, `COMPETE_MAX`, `POOLS_FILE`, `PTHRESH`, `MAX_SOURCES`, `MIN_WEIGHT`.
 
+## Homogeneity QC of the pooled groups (step 2b, on by default; `RUN_HOMOGENEITY=0` skips it)
+Pooled sources (e.g. Armenia_LBA_IA, 86 individuals) and target groups must be internally consistent, otherwise "one source" is really a mixture of
+different populations. `scripts/homogeneity_test.R` splits each target/pool group into **sub-labels (published label x sampling region)** and runs
+**qpWave rank 0 between every pair of sub-labels** against the design's fixed right set; this is the same logic as Narasimhan et al. 2019 SM S3.1
+(individuals of a site tested against each other with `RightAll`). Output in `<out>/homogeneity/`: `homogeneity_by_group.tsv`
+(fraction of pairs rejected at p < 0.01; about 1% is expected by chance), `homogeneity_by_sublabel.tsv` (sub-labels rejected against >= 50% of their group = outlier
+candidates), `homogeneity_pairs.tsv`, `homogeneity_heatmaps.png`.
+Limits: group-level, not individual-level outlier detection; single-individual sub-labels have little power; a group with one sub-label cannot be tested
+(for example BMAC, Han, the Turk and the Zoroastrians); power depends on the right set (higher with the paper-style set than with the default design).
+Validation on simulated data: homogeneous groups gave 5 of 290 pairs rejected (1.7%), and three deliberately lumped distinct groups were rejected in 3 of 3 pairs.
+This test did not exist when the first results were produced, so those results were obtained without it.
+
 ## Outputs (`qpwave_qpadm_out/`)
 `explore/` (ADMIXTURE/PCA: `admixture_group_profiles.png`, `pca_targets_vs_candidates.png`, `admixture_component_coverage.tsv`,
 `admixture_pca_candidate_screen.tsv`, `admixture_pool_redundancy.tsv`, …) · `qpwave_targets_pairwise.tsv|png` · `qpwave_targets_joint_rank.tsv` ·

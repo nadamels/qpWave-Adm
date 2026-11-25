@@ -108,13 +108,23 @@ python3 -I "$REPO_DIR/scripts/make_pops.py" \
   --meta  "$REPO_DIR/fam_meta/sample_meta.tsv" \
   --fam   "$DATA_DIR/$BED_PREFIX.fam" \
   --pools "$POOLS_FILE" \
+  --sublabels \
   --outdir "$OUTDIR"
 ln -sf "$DATA_DIR/$BED_PREFIX.bed" "$OUTDIR/plink/data.bed"     # original genotypes are never modified
 ln -sf "$DATA_DIR/$BED_PREFIX.bim" "$OUTDIR/plink/data.bim"
+ln -sf "$DATA_DIR/$BED_PREFIX.bed" "$OUTDIR/plink_sub/data.bed"       # sub-label labelling for the homogeneity QC
+ln -sf "$DATA_DIR/$BED_PREFIX.bim" "$OUTDIR/plink_sub/data.bim"
 
 # ---------------- 2. f2 blocks -> qpWave -> source screen -> qpAdm -----------
 echo "[$(date +%T)] step 2/3  qpWave + qpAdm"
 Rscript "$REPO_DIR/scripts/qpwave_qpadm.R"
+
+# ---------------- 2b. homogeneity QC of the pooled groups (sub-label pairs, qpWave rank 0) ----------------
+if [[ ${RUN_HOMOGENEITY:-1} == 1 ]]; then
+  echo "[$(date +%T)] step 2b/3 homogeneity QC of pooled groups"
+  PLINK_PREFIX_SUB="$OUTDIR/plink_sub/data" Rscript "$REPO_DIR/scripts/homogeneity_test.R" \
+    || echo "WARNING: homogeneity QC failed; the qpAdm results above do not depend on it"
+fi
 
 # ---------------- 3. plots ---------------------------------------------------
 echo "[$(date +%T)] step 3/3  plots"
