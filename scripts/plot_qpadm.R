@@ -23,10 +23,17 @@ hues <- c("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#62
 # colour follows the SOURCE (config order), so a source keeps its colour across every figure.
 best_src <- order$source[order$source %in% unique(sel$source[sel$rank == 1])]          # best-model sources get the 8 hues first
 used <- c(best_src, order$source[order$source %in% setdiff(unique(sel$source), best_src)])
-extra <- rep(other, length.out = max(0, length(used) - length(hues)))
-cols <- setNames(c(hues, extra)[seq_along(used)], used)
-if (length(used) > length(hues))
-  message("NOTE: ", length(used) - length(hues), " source(s) beyond 8 are drawn in neutral greys (named in-bar).")
+# Colour follows the SOURCE, identically in every figure and run: the distal-design sources have fixed colours (EEHG yellow, WSHG violet, ...);
+# any other source takes a hue that no fixed source in this plot uses, then neutral greys.
+fixed <- c(Anatolia_N = hues[1], Iran_N = hues[2], WHG = hues[3], EEHG = hues[4], East_Asia_Han = hues[5],
+           Natufian = hues[6], WSHG = hues[7], PPN = hues[8], Onge = other[1])
+cols <- character(0)
+for (u in used) if (u %in% names(fixed)) cols[u] <- fixed[[u]]
+free <- setdiff(c(hues, other), unname(cols))
+k <- 0
+for (u in used) if (!(u %in% names(cols))) { k <- k + 1; cols[u] <- free[((k - 1) %% length(free)) + 1] }
+cols <- cols[used]
+if (sum(cols %in% other) > 0) message("NOTE: ", sum(cols %in% other), " source(s) drawn in neutral greys (named in-bar).")
 
 nlab <- setNames(sprintf("%s  (n=%d)", gs$group, gs$n), gs$group)
 tg_order <- gs$group[gs$role == "target"]
