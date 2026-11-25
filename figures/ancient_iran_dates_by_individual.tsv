@@ -1,0 +1,39 @@
+group	IID	population_label	kind	older_BCE	younger_BCE	midpoint	bp	bp_sd	date_raw
+Iran_BA_Hasanlu	I4354	IRN_Hasanlu_MBA	radiocarbon (95% calibrated interval)	-2196	-2029	-2112.5	3705	20	2196-2029 calBCE (3705±20 BP, PSUAMS-2771)
+Iran_BA_Hasanlu	I4098	IRN_Hasanlu_LBA_B	radiocarbon (95% calibrated interval)	-1496	-1323	-1409.5	3150	20	1496-1323 calBCE (3150±20 BP, PSUAMS-3118)
+Iran_BA_Hasanlu	I4097_all	IRN_Hasanlu_LBA_A	radiocarbon (95% calibrated interval)	-1425	-1284	-1354.5	3095	25	1425-1284 calBCE (3095±25 BP, PSUAMS-1948)
+Iran_BA_ShahrISokhta_BA1	I11462	Shahr_I_Sokhta_BA1	radiocarbon (95% calibrated interval)	-2911	-2880	-2895.5	4270	20	2911-2880 calBCE (4270±20 BP, PSUAMS-4778)
+Iran_BA_ShahrISokhta_BA1	I11474	Shahr_I_Sokhta_BA1	archaeological context range	-2700	-2600	-2650	NA	NA	2700-2600 BCE
+Iran_BA_ShahrISokhta_BA1	I11476	Shahr_I_Sokhta_BA1	archaeological context range	-3200	-2100	-2650	NA	NA	3200-2100 BCE
+Iran_BA_ShahrISokhta_BA1	I11478	Shahr_I_Sokhta_BA1	archaeological context range	-3200	-1900	-2550	NA	NA	3200-1900 BCE
+Iran_BA_ShahrISokhta_IRN	I11459	IRN_Shahr_I_Sokhta_BA	radiocarbon (95% calibrated interval)	-2874	-2630	-2752	4150	25	2874-2630 calBCE (4150±25 BP, PSUAMS-5715)
+Iran_BA_ShahrISokhta_IRN	I8728	IRN_Shahr_I_Sokhta_BA	archaeological context range	-2600	-2500	-2550	NA	NA	2600-2500 BCE
+Iran_BA_ShahrISokhta_IRN	I11456	IRN_Shahr_I_Sokhta_BA	archaeological context range	-2600	-2500	-2550	NA	NA	2600-2500 BCE
+Iran_BA_ShahrISokhta_IRN	I11466	IRN_Shahr_I_Sokhta_BA	archaeological context range	-2500	-2000	-2250	NA	NA	2500-2000 BCE
+Iran_ChL_HajjiFiruz	I4241	IRN_HajjiFiruz_ChL	radiocarbon (95% calibrated interval)	-6021	-5891	-5956	7080	30	6021-5891 calBCE (7080±30 BP, PSUAMS-2163)
+Iran_ChL_HajjiFiruz	I2323_all	IRN_HajjiFiruz_ChL	radiocarbon (95% calibrated interval)	-6064	-5846	-5955	7090	50	6064-5846 calBCE (7090±50 BP, Poz-81115)
+Iran_ChL_HajjiFiruz	I4349	Hajji_Firuz_C	radiocarbon (95% calibrated interval)	-5887	-5724	-5805.5	6915	40	5887-5724 calBCE (6915±40 BP, PSUAMS-2126)
+Iran_ChL_TepeHissar	I2921	IRN_TepeHissar_ChL	radiocarbon (95% calibrated interval)	-3648	-3528	-3588	4820	30	3648-3528 calBCE (4820±30 BP, PSUAMS-1912)
+Iran_ChL_TepeHissar	I2337_all	IRN_TepeHissar_ChL	radiocarbon (95% calibrated interval)	-3640	-3518	-3579	4780	30	3640-3518 calBCE (4780±30 BP, PSUAMS-1919)
+Iran_ChL_TepeHissar	I2924	Tepe_Hissar_C	radiocarbon (95% calibrated interval)	-2881	-2666	-2773.5	4170	25	2881-2666 calBCE (4170±25 BP, PSUAMS-2262)
+Iran_ChL_TepeHissar	I2925	Tepe_Hissar_C	radiocarbon (95% calibrated interval)	-2881	-2666	-2773.5	4170	25	2881-2666 calBCE (4170±25 BP, PSUAMS-1913)
+Iran_ChL_TepeHissar	I2923	Tepe_Hissar_C	radiocarbon (95% calibrated interval)	-2878	-2636	-2757	4160	25	2878-2636 calBCE (4160±25 BP, PSUAMS-1915)
+Iran_ChL_TepeHissar	I2928	Tepe_Hissar_C	radiocarbon (95% calibrated interval)	-2858	-2505	-2681.5	4095	25	2858-2505 calBCE (4095±25 BP, PSUAMS-1917)
+Iran_ChL_TepeHissar	I2927	Tepe_Hissar_C	radiocarbon (95% calibrated interval)	-2575	-2350	-2462.5	3970	30	2575-2350 calBCE (3970±30 BP, PSUAMS-1916)
+Iran_IA_Hasanlu	I4099_all	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1369	-1117	-1243	2980	25	1369-1117 calBCE (2980±25 BP, PSUAMS-1947)
+Iran_IA_Hasanlu	I6432	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1262	-1116	-1189	2965	20	1262-1116 calBCE (2965±20 BP, PSUAMS-2620)
+Iran_IA_Hasanlu	I6431	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1192	-1005	-1098.5	2890	20	1192-1005 calBCE (2890±20 BP, PSUAMS-2619)
+Iran_IA_Hasanlu	I6388	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1190	-999	-1094.5	2885	20	1190-999 calBCE (2885±20 BP, PSUAMS-2813)
+Iran_IA_Hasanlu	I6428	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1115	-932	-1023.5	2860	20	1115-932 calBCE (2860±20 BP, PSUAMS-2617)
+Iran_IA_Hasanlu	I4356	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1111	-931	-1021	2855	20	1111-931 calBCE (2855±20 BP, PSUAMS-2773)
+Iran_IA_Hasanlu	I4353	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1046	-900	-973	2810	25	1046-900 calBCE (2810±25 BP, PSUAMS-2150)
+Iran_IA_Hasanlu	I4100_all	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1012	-906	-959	2810	20	1012-906 calBCE (2810±20 BP, PSUAMS-1946)
+Iran_IA_Hasanlu	I6429	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1011	-904	-957.5	2805	20	1011-904 calBCE (2805±20 BP, PSUAMS-2618)
+Iran_IA_Hasanlu	I4355	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-1011	-860	-935.5	2795	20	1011-860 calBCE (2795±20 BP, PSUAMS-2772)
+Iran_IA_Hasanlu	I6430	IRN_Hasanlu_IA	archaeological context range	-1200	-600	-900	NA	NA	1200-600 BCE
+Iran_IA_Hasanlu	I4232_all	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-928	-827	-877.5	2745	20	928-827 calBCE (2745±20 BP, PSUAMS-3181)
+Iran_IA_Hasanlu	I4357	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-925	-826	-875.5	2740	20	925-826 calBCE (2740±20 BP, PSUAMS-2959)
+Iran_IA_Hasanlu	I4233_all	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-902	-812	-857	2710	20	902-812 calBCE (2710±20 BP, PSUAMS-2982)
+Iran_IA_Hasanlu	I4269_all	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-823	-787	-805	2635	20	823-787 calBCE (2635±20 BP, PSUAMS-3001)
+Iran_IA_Hasanlu	I4280_all	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-805	-773	-789	2590	20	805-773 calBCE (2590±20 BP, PSUAMS-3003)
+Iran_IA_Hasanlu	I4338	IRN_Hasanlu_IA	radiocarbon (95% calibrated interval)	-761	-479	-620	2470	20	761-479 calBCE (2470±20 BP, PSUAMS-2984)
