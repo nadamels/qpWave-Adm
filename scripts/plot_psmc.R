@@ -2,14 +2,15 @@
 # =============================================================================
 # PSMC curves of the modern Iranians, coloured by sub-population (the five target groups)
 #
-#   Rscript scripts/plot_psmc.R [psmc_dir=psmc] [out_dir=figures] [g=25] [mu=1.25e-8] [s=100] [iter=20] [xmin=1e3] [xmax=1e5]
+#   Rscript scripts/plot_psmc.R [psmc_dir=psmc] [out_dir=figures] [g=25] [mu=2.5e-8] [s=100] [iter=20] [xmin=1e3] [xmax=1e5]
 #
 #   g   generation time in years
-#   mu  mutation rate per site per generation
+#   mu  mutation rate per site per generation (psmc_plot.pl default 2.5e-8; 1.25e-8 is the other common human choice and doubles Ne)
 #   s   bin size in bp used when the .psmcfa files were made (fq2psmcfa -s, PSMC default 100)
 #   iter  iteration to plot (psmc_plot.pl default 20; the psmc runs here used -N25)
 #   xmin, xmax  time window in years (default 1e3 to 1e5, i.e. 10^3-10^5 years)
 #
+# Validated against the original psmc_plot.pl (same time and Ne to the last digit on a test file).
 # Scaling follows psmc_plot.pl:  N0 = theta0 / (4 * mu * s);  time(years) = 2 * N0 * t_k * g;  Ne = N0 * lambda_k,
 # as psmc_plot.pl does: iteration `iter`, and the final group of tied time intervals (the unreliable oldest bins) is not drawn. Files are matched to groups by sample ID (file name) through
 # scripts/make_pops.py; files without a group (not in the sample metadata, or not one of the 68 clustered Iranians) are left out and listed.
@@ -18,7 +19,7 @@ suppressPackageStartupMessages({ library(dplyr); library(readr); library(tidyr);
 a <- commandArgs(TRUE)
 PSMC_DIR <- if (length(a) >= 1) a[1] else "psmc"; OUT <- if (length(a) >= 2) a[2] else "figures"
 G  <- if (length(a) >= 3) as.numeric(a[3]) else 25
-MU <- if (length(a) >= 4) as.numeric(a[4]) else 1.25e-8
+MU <- if (length(a) >= 4) as.numeric(a[4]) else 2.5e-8
 S  <- if (length(a) >= 5) as.numeric(a[5]) else 100
 ITER <- if (length(a) >= 6) as.integer(a[6]) else 20
 XMIN <- if (length(a) >= 7) as.numeric(a[7]) else 1e3
@@ -91,11 +92,11 @@ p <- ggplot() +
   coord_cartesian(ylim = c(0, ymax), clip = "on") +
   scale_y_continuous(expand = c(0, 0)) +
   annotation_logticks(sides = "b", size = 0.3, colour = ink2) +
-  labs(x = bquote(paste("Years (g=", .(G), ", ", mu, "=", .(MU), ", s=", .(S), ")")),
+  labs(x = bquote(paste("Years (g=", .(G), ", ", mu, "=", .(signif(MU / 10^floor(log10(MU)), 3)) %*% 10^.(floor(log10(MU))), ", s=", .(S), ")")),
        y = if (unit == 1e4) expression("Effective population size (" %*% 10^4 * ")") else expression("Effective population size (" %*% 10^3 * ")"),
        title = "PSMC of modern Iranians by sub-population", subtitle = "thin lines: individuals; thick lines: group median") +
   theme_classic(base_size = 12) +
-  theme(legend.position = c(0.80, 0.70), legend.background = element_blank(), legend.key = element_blank(), legend.text = element_text(size = 10.5),
+  theme(legend.position = c(0.20, 0.68), legend.background = element_blank(), legend.key = element_blank(), legend.text = element_text(size = 10.5),
         axis.line = element_line(colour = ink, linewidth = 0.5), axis.text = element_text(colour = ink), plot.title.position = "plot", plot.margin = margin(8, 22, 8, 8),
         plot.title = element_text(face = "bold"), plot.subtitle = element_text(colour = ink2), panel.border = element_blank()) +
   guides(colour = guide_legend(override.aes = list(linewidth = 1.6, alpha = 1)))
