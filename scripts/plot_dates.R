@@ -47,35 +47,35 @@ write_tsv(summ, file.path(OUT, "ancient_iran_dates_by_group.tsv"))
 fy <- function(x) sprintf("%.0f", abs(x))
 cat("\nGroup summary (midpoints; negative = BCE):\n"); print(summ %>% mutate(across(where(is.numeric), ~ round(.x, 0))), width = 200)
 
-lev <- summ$group
+lev <- rev(summ$group)                                   # oldest group at the top of the plot
 d$group <- factor(d$group, levels = lev)
-d <- d %>% arrange(group, mid) %>% group_by(group) %>% mutate(row = row_number()) %>% ungroup()
-strip <- setNames(sprintf("%s  (n=%d)\nmean %s BCE%s", summ$group, summ$n, fy(summ$mean_mid),
-                          ifelse(is.na(summ$sd_mid), "  (SD undefined, n=1)", sprintf("  +/- %s yr SD", fy(summ$sd_mid)))), summ$group)
-sg <- summ %>% mutate(group = factor(group, levels = lev), lo = mean_mid - ifelse(is.na(sd_mid), 0, sd_mid), hi = mean_mid + ifelse(is.na(sd_mid), 0, sd_mid))
-hues <- c("#2a78d6", "#eb6834", "#1baf7a", "#e87ba4", "#6250d6", "#eda100"); cols <- setNames(hues, keep)
+d <- d %>% arrange(group, mid) %>% group_by(group) %>%
+  mutate(off = if (n() > 1) seq(-0.30, 0.30, length.out = n()) else 0) %>% ungroup() %>% mutate(y = as.numeric(group) + off)
+sg <- summ %>% mutate(group = factor(group, levels = lev), y = as.numeric(group), sd0 = ifelse(is.na(sd_mid), 0, sd_mid))
+ylab_txt <- setNames(sprintf("%s\nn=%d, %s BCE%s", summ$group, summ$n, fy(summ$mean_mid),
+                             ifelse(is.na(summ$sd_mid), "", sprintf(" +/- %s", fy(summ$sd_mid)))), summ$group)
+hues <- c("#2a78d6", "#eb6834", "#1baf7a", "#e87ba4", "#6250d6", "#eda100")
+cols <- setNames(hues, c("Iran_ChL_HajjiFiruz", "Iran_ChL_TepeHissar", "Iran_BA_ShahrISokhta_BA1", "Iran_BA_ShahrISokhta_IRN", "Iran_BA_Hasanlu", "Iran_IA_Hasanlu"))
 ink <- "#0b0b0b"; ink2 <- "#52514e"
 
-p <- ggplot(d) +
-  geom_rect(data = sg %>% filter(!is.na(sd_mid)), aes(xmin = lo, xmax = hi, ymin = -Inf, ymax = Inf, fill = group), alpha = 0.13, inherit.aes = FALSE) +
-  geom_vline(data = sg, aes(xintercept = mean_mid, colour = group), linewidth = 0.7, linetype = "solid", alpha = 0.9) +
-  geom_segment(aes(x = older, xend = younger, y = row, yend = row, colour = group, linetype = kind), linewidth = 1.6, lineend = "butt", alpha = 0.85) +
-  geom_point(aes(x = mid, y = row, colour = group), size = 1.8, shape = 21, fill = "#fcfcfb", stroke = 0.9) +
-  facet_grid(group ~ ., scales = "free_y", space = "free_y", labeller = labeller(group = strip), switch = "y") +
+p <- ggplot() +
+  geom_rect(data = sg %>% filter(!is.na(sd_mid)), aes(xmin = mean_mid - sd0, xmax = mean_mid + sd0, ymin = y - 0.42, ymax = y + 0.42, fill = group), alpha = 0.16) +
+  geom_segment(data = sg, aes(x = mean_mid, xend = mean_mid, y = y - 0.42, yend = y + 0.42, colour = group), linewidth = 0.9) +
+  geom_segment(data = d, aes(x = older, xend = younger, y = y, yend = y, colour = group, linetype = kind), linewidth = 1.1, lineend = "butt", alpha = 0.85) +
+  geom_point(data = d, aes(x = mid, y = y, colour = group), size = 1.1, shape = 21, fill = "#fcfcfb", stroke = 0.7) +
   scale_colour_manual(values = cols, guide = "none") + scale_fill_manual(values = cols, guide = "none") +
   scale_linetype_manual(values = c("radiocarbon (95% calibrated interval)" = "solid", "archaeological context range" = "22"), name = NULL) +
   scale_x_continuous(breaks = seq(-6000, -500, 500), labels = function(x) abs(x), expand = expansion(mult = c(0.01, 0.01))) +
-  scale_y_continuous(expand = expansion(add = 0.7)) +
+  scale_y_continuous(breaks = seq_along(lev), labels = ylab_txt[lev], expand = expansion(add = 0.5)) +
   labs(x = "Years BCE (calibrated)", y = NULL, title = "Archaeological dates of the ancient Iranian target groups",
-       subtitle = "one bar per individual (interval) with its midpoint; vertical line = group mean of midpoints; shaded band = mean +/- 1 SD across individuals") +
-  theme_minimal(base_size = 10.5) +
+       subtitle = "bars = individual intervals (dots = midpoints); line = group mean; band = mean +/- 1 SD across individuals") +
+  theme_minimal(base_size = 9) +
   theme(plot.background = element_rect(fill = "#fcfcfb", colour = NA), panel.background = element_rect(fill = "#fcfcfb", colour = NA),
-        text = element_text(colour = ink), axis.text = element_text(colour = ink2), axis.text.y = element_blank(), panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(), panel.grid.major.x = element_line(colour = "#e6e5e1", linewidth = 0.4),
-        strip.text.y.left = element_text(angle = 0, hjust = 0, face = "bold", size = 9), strip.placement = "outside",
-        panel.spacing.y = unit(0.5, "lines"), legend.position = "bottom", plot.title.position = "plot", plot.title = element_text(face = "bold", size = 13),
-        plot.subtitle = element_text(colour = ink2), plot.margin = margin(8, 14, 8, 8))
-ht <- 2.2 + 0.19 * nrow(d) + 0.5 * length(lev)
-ggsave(file.path(OUT, "ancient_iran_dates.pdf"), p, width = 12.5, height = ht)
-tryCatch(ggsave(file.path(OUT, "ancient_iran_dates.png"), p, width = 12.5, height = ht, dpi = 250), error = function(e) message("PNG not written: ", conditionMessage(e)))
+        text = element_text(colour = ink), axis.text = element_text(colour = ink2), axis.text.y = element_text(colour = ink, hjust = 0, size = 7.5, lineheight = 0.95),
+        panel.grid.major.y = element_line(colour = "#efeeea", linewidth = 0.3), panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_line(colour = "#e6e5e1", linewidth = 0.4), legend.position = "bottom", legend.key.width = unit(1.4, "lines"),
+        legend.margin = margin(0, 0, 0, 0), plot.title.position = "plot", plot.title = element_text(face = "bold", size = 11),
+        plot.subtitle = element_text(colour = ink2, size = 8), plot.margin = margin(6, 10, 4, 6))
+ggsave(file.path(OUT, "ancient_iran_dates.pdf"), p, width = 8.2, height = 3.9)
+tryCatch(ggsave(file.path(OUT, "ancient_iran_dates.png"), p, width = 8.2, height = 3.9, dpi = 300), error = function(e) message("PNG not written: ", conditionMessage(e)))
 message("written to ", OUT)
