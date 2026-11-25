@@ -89,6 +89,8 @@ groups such as Central_Iranian (n=46) fail every model. The paper also: removes 
 outliers with a qpAdm homogeneity test, and excludes singletons from primary analyses. Substitutions forced by this dataset: Ethiopia_4500BP -> Mbuti,
 ESHG (Lake Baikal) -> Chukchi (n=1), WSHG is 1 genome (3 in the paper). Iran_ChL and Iran_BA_SE (the paper's Hajji_Firuz_C, Tepe_Hissar_C,
 Shahr_I_Sokhta_BA1) are sources in this design even though the default design leaves them out; Iron Age Iranians stay out.
+Sensitivity variant `config/pop_pools_narasimhan_deepright.tsv` = the same plus Onge, Papuan and Karitiana on the right (run with
+`DESIGN=narasimhan POOLS_FILE=$PWD/config/pop_pools_narasimhan_deepright.tsv OUTDIR=<new folder>`); it tests whether the Han weights are an artefact of the small right set.
 Env switches (set by `DESIGN`, overridable): `ROTATE`, `CI_Z`, `COMPETE`, `COMPETE_MAX`, `POOLS_FILE`, `PTHRESH`, `MAX_SOURCES`, `MIN_WEIGHT`.
 
 ## Outputs (`qpwave_qpadm_out/`)
