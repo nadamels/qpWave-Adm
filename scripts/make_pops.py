@@ -7,6 +7,7 @@ Inputs
   --pools  config/pop_pools.tsv            (group, role, population_label)
   --outdir <dir>                           (writes plink/data.fam, sample_groups.tsv, group_summary.tsv)
 
+With --targets config, groups whose role in the pools file is "target" (population labels) are the targets, e.g. ancient Iranians.
 Target (modern Iranian) groups follow the hierarchical-clustering result (n = 68 modern Iranians):
   Mod_Zoroastrian        Population == Zoroastrian
   Mod_Turk               Population == Turk               (the single Turk sample; NOT Turk_Azeri)
@@ -27,6 +28,9 @@ def main():
     ap.add_argument("--fam", required=True)
     ap.add_argument("--pools", required=True)
     ap.add_argument("--outdir", required=True)
+    ap.add_argument("--targets", choices=["modern", "config", "both"], default="modern",
+                    help="modern: the 68 modern Iranians in five groups (default); config: groups with role 'target' in the pools file "
+                         "(e.g. ancient Iranians); both: union")
     ap.add_argument("--sublabels", action="store_true",
                     help="also write plink_sub/data.fam + sample_subgroups.tsv: target/pool groups split into sub-labels "
                          "(published label x sampling region) for the homogeneity test")
@@ -44,7 +48,7 @@ def main():
 
     # ---- targets: modern Iranians with an Iran_cluster_* label (= the 68 in the dendrogram)
     target = {}
-    for iid, r in meta.items():
+    for iid, r in (meta.items() if a.targets in ("modern", "both") else []):
         if (r["Super-population"] == "Iran" and r["Undergone Imputation"] == "No"
                 and r["Empirical cluster (Study Pop only)"].startswith("Iran_cluster")):
             pop = r["Population"]
@@ -59,11 +63,12 @@ def main():
             else:
                 g = "Mod_Central_Iranian"
             target[iid] = g
-    if len(target) != 68:
-        print(f"WARNING: expected 68 modern Iranians, found {len(target)}", file=sys.stderr)
-    for need in JEWISH_BRANCH_EXTRA:
-        if need not in target:
-            sys.exit(f"ERROR: {need} (Jewish-branch sample) is not among the modern Iranian targets")
+    if a.targets in ("modern", "both"):
+        if len(target) != 68:
+            print(f"WARNING: expected 68 modern Iranians, found {len(target)}", file=sys.stderr)
+        for need in JEWISH_BRANCH_EXTRA:
+            if need not in target:
+                sys.exit(f"ERROR: {need} (Jewish-branch sample) is not among the modern Iranian targets")
 
     # ---- pools / right_base from the pools file (exact Population labels)
     label2group, group_role, group_order = {}, {}, []
@@ -72,7 +77,7 @@ def main():
     rd = csv.DictReader(rows, delimiter="\t")
     for r in rd:
         g, role, lab = r["group"].strip(), r["role"].strip(), r["population_label"].strip()
-        if role not in ("pool", "right_base", "ignore"):
+        if role not in ("target", "pool", "right_base", "ignore"):
             sys.exit(f"ERROR: bad role '{role}' for group {g}")
         if g not in group_order:
             group_order.append(g)

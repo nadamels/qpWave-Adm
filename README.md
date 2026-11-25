@@ -9,7 +9,7 @@ sbatch run_qpwave_qpadm.sh        # the whole analysis; results -> ../qpwave_qpa
 
 Run settings are environment variables (`MAX_SOURCES=4 PTHRESH=0.01 sbatch --export=ALL run_qpwave_qpadm.sh`):
 `BED_PREFIX` (default `all_anc_mod.run3`, all SNPs; `all_anc_mod.run3.LDpruned` also works), `PTHRESH` (0.05),
-`MIN_SOURCES` (2), `MAX_SOURCES` (3), `MIN_WEIGHT` (0.05), `TOP_N` (3), `WEIGHT_TOL` (0), `FORCE_F2` (0), `DESIGN` (default | narasimhan | distal),
+`MIN_SOURCES` (2), `MAX_SOURCES` (3), `MIN_WEIGHT` (0.05), `TOP_N` (3), `WEIGHT_TOL` (0), `FORCE_F2` (0), `DESIGN` (default | narasimhan | distal | ancient_iran_distal), `TARGETS` (modern | config),
 `RUN_EXPLORE` (1), `CONDA_ENV`, `DATA_DIR`, `OUTDIR`.
 
 ## Pipeline
@@ -104,6 +104,18 @@ DESIGN=distal NCORES=4 MAXMEM_MB=8000 nohup bash run_qpwave_qpadm.sh > qpwave_di
 Differences from the paper: no Upper Paleolithic outgroups (Ust_Ishim, Tianyuan, ANE/MA1, Villabruna) exist in this dataset, so the right set is weaker and ANE-related ancestry cannot be
 separated cleanly; Lake Baikal ESHG is replaced by modern Han; WSHG and Onge are small groups. Motala_HG is left out (a WHG + EEHG mixture; add it in `config/pop_pools_distal.tsv` to try).
 The homogeneity step is off by default here (4 fixed outgroups give it little power); use the paper-style run's homogeneity results.
+
+## Ancient Iranians as targets (opt-in): `DESIGN=ancient_iran_distal`
+Models the ancient Iranians in the dataset (Chalcolithic, Bronze Age, Iron Age) with the distal design, which is how Narasimhan et al. 2019 model ancient Copper Age and later populations.
+Targets come from the config file (`--targets config`, role `target`), grouped by site and period: Iran_ChL_HajjiFiruz (3), Iran_ChL_TepeHissar (7), Iran_BA_ShahrISokhta_BA1 (4),
+Iran_BA_ShahrISokhta_IRN (4), Iran_BA_Hasanlu (3), Iran_IA_Hasanlu (17), Iran_BIA_DinkhaTepe_A (6), Iran_BIA_DinkhaTepe_B (8); two singletons (IRN_HajjiFiruz_BA, IRN_HajjiFiruz_IA) are excluded.
+Sources, outgroups and criteria are those of the distal design (`config/pop_pools_ancient_iran_distal.tsv`).
+```bash
+DESIGN=ancient_iran_distal sbatch --cpus-per-task=4 --mem=24G --time=02:00:00 --export=ALL run_qpwave_qpadm.sh     # results -> qpwave_qpadm_out_ancient_iran_distal/
+```
+Checks against the paper: western Iran (Hajji Firuz) should need two sources (Iranian-farmer-related + Anatolian-farmer-related); eastern Iran (Tepe Hissar, Shahr-i-Sokhta) should show less Anatolian and an extra
+WSHG-related source; Shahr-i-Sokhta is reported to contain a main cluster with ~20% Anatolian-farmer-related ancestry and Indus-Periphery-like individuals with ~0% Anatolian and AASI (Onge here).
+Limits: groups of 3-8 individuals, imputed diploid targets, heterogeneous groups (Tepe Hissar spans ~3640-2640 BCE; Hasanlu Bronze Age pools three single individuals), and no homogeneity step by default.
 
 ## Homogeneity QC of the pooled groups (step 2b, on by default; `RUN_HOMOGENEITY=0` skips it)
 Pooled sources (e.g. Armenia_LBA_IA, 86 individuals) and target groups must be internally consistent, otherwise "one source" is really a mixture of

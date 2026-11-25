@@ -35,13 +35,14 @@ def main():
     ap.add_argument("--pools", required=True); ap.add_argument("--q", required=True)
     ap.add_argument("--eigenvec", required=True); ap.add_argument("--outdir", required=True)
     ap.add_argument("--npcs", type=int, default=4)
+    ap.add_argument("--targets", default="modern", help="forwarded to make_pops.py")
     a = ap.parse_args()
     os.makedirs(a.outdir, exist_ok=True)
 
     here = os.path.dirname(os.path.abspath(__file__))
     tmp = os.path.join(a.outdir, "_groups")
     subprocess.run([sys.executable, "-I", os.path.join(here, "make_pops.py"), "--meta", a.meta, "--fam", a.fam,
-                    "--pools", a.pools, "--outdir", tmp, "--keep-ignored"], check=True, stdout=subprocess.DEVNULL)
+                    "--pools", a.pools, "--outdir", tmp, "--keep-ignored", "--targets", a.targets], check=True, stdout=subprocess.DEVNULL)
 
     fam = [l.split()[1] for l in open(a.fam, encoding="utf-8") if l.strip()]
     Q = np.loadtxt(a.q)

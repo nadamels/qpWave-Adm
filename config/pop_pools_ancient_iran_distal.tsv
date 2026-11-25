@@ -1,0 +1,55 @@
+# Ancient Iranian targets (Chalcolithic, Bronze Age, Iron Age) modelled with the DISTAL design of Narasimhan et al. 2019 (SM S4.2.4):
+# pre-Copper-Age ancestry components as rotating sources, a few fixed deep outgroups, p >= 0.01 and every weight +-2 SE inside [0,1].
+# This is how the paper itself models ancient Copper Age and later populations. Use:
+#   DESIGN=ancient_iran_distal sbatch --export=ALL run_qpwave_qpadm.sh          (targets come from THIS file: --targets config)
+#
+# TARGETS are grouped by site and archaeological period, as in the paper. Dates are from sample_meta.tsv (first sample of each label):
+#   Hajji Firuz, NW Iran: IRN_HajjiFiruz_ChL ~6000-5890 BCE, Hajji_Firuz_C ~5890-5720 BCE (labelled Chalcolithic by the data source)
+#   Tepe Hissar, N Iran: IRN_TepeHissar_ChL ~3640-3520 BCE, Tepe_Hissar_C ~2880-2640 BCE (pooled as in the paper; the date span is wide -> check homogeneity)
+#   Shahr-i-Sokhta, SE Iran, Bronze Age: Shahr_I_Sokhta_BA1 ~2910-2880 BCE and IRN_Shahr_I_Sokhta_BA ~2600-2500 BCE (kept as two groups; the paper shows this
+#       site contains more than one ancestry profile)
+#   Hasanlu, NW Iran: Bronze Age IRN_Hasanlu_MBA ~2200-2030, LBA_A ~1425-1285, LBA_B ~1495-1325 BCE (1 sample each, pooled, exploratory);
+#       Iron Age IRN_Hasanlu_IA ~1370-1120 BCE (17)
+#   Dinkha Tepe, NW Iran, Bronze/Iron Age: IRN_DinkhaTepe_BIA_A (6) and BIA_B (8, ~1880-1690 BCE), the two published clusters
+# Singletons (IRN_HajjiFiruz_BA, IRN_HajjiFiruz_IA) are excluded, as the paper excludes single-individual groups from primary analyses.
+# Ganj_Dareh_N (Iran_N) is a SOURCE here, not a target.
+#
+# role = target | pool | right_base | ignore
+group	role	population_label
+# ---------------- TARGETS: ancient Iranians ----------------
+Iran_ChL_HajjiFiruz	target	IRN_HajjiFiruz_ChL
+Iran_ChL_HajjiFiruz	target	Hajji_Firuz_C
+Iran_ChL_TepeHissar	target	IRN_TepeHissar_ChL
+Iran_ChL_TepeHissar	target	Tepe_Hissar_C
+Iran_BA_ShahrISokhta_BA1	target	Shahr_I_Sokhta_BA1
+Iran_BA_ShahrISokhta_IRN	target	IRN_Shahr_I_Sokhta_BA
+Iran_BA_Hasanlu	target	IRN_Hasanlu_MBA
+Iran_BA_Hasanlu	target	IRN_Hasanlu_LBA_A
+Iran_BA_Hasanlu	target	IRN_Hasanlu_LBA_B
+Iran_IA_Hasanlu	target	IRN_Hasanlu_IA
+Iran_BIA_DinkhaTepe_A	target	IRN_DinkhaTepe_BIA_A
+Iran_BIA_DinkhaTepe_B	target	IRN_DinkhaTepe_BIA_B
+IRN_HajjiFiruz_singletons	ignore	IRN_HajjiFiruz_BA
+IRN_HajjiFiruz_singletons	ignore	IRN_HajjiFiruz_IA
+# ---------------- fixed RIGHT outgroups ----------------
+Mbuti	right_base	Mbuti
+Papuan	right_base	Papuan
+Papuan	right_base	PapuanHighlands
+Papuan	right_base	PapuanSepik
+Karitiana	right_base	Karitiana
+Chukchi	right_base	Chukchi
+# ---------------- distal pool (rotated between left and right) ----------------
+Anatolia_N	pool	Anatolia_N
+Anatolia_N	pool	Anatolia_Neolithic
+Anatolia_N	pool	TUR_Marmara_Barcın_N
+Anatolia_N	pool	TUR_Marmara_Menteşe_N
+Anatolia_N	pool	TUR_Marmara_Ilıpınar_N
+Iran_N	pool	Ganj_Dareh_N
+WHG	pool	WHG
+EEHG	pool	EEHG
+WSHG	pool	WSHG
+Onge	pool	Onge
+East_Asia_Han	pool	Han_Chinese
+PPN	pool	JOR_PPNB
+PPN	pool	JOR_PPNC_1d.rel.I1699
+Natufian	pool	ISR_Natufian_EpiP

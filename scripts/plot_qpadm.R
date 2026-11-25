@@ -67,7 +67,7 @@ p1 <- ggplot(best, aes(x = weight, y = target_f, fill = source)) +
   scale_fill_manual(values = cols, drop = TRUE) +
   scale_x_continuous(labels = scales::percent, breaks = seq(0, 1, .25), limits = c(0, 1.32),
                      expand = expansion(mult = c(0, 0))) +
-  labs(x = "Ancestry proportion", y = NULL, title = "qpAdm: best model per modern Iranian group",
+  labs(x = "Ancestry proportion", y = NULL, title = "qpAdm: best model per target group",
        subtitle = sprintf("simplest model with p >= %g and %s; +/- = block-jackknife SE", PTHRESH, crit)) +
   guides(fill = guide_legend(nrow = 2)) + theme_q()
 save2(p1, "qpadm_best_models", 10, 1.6 + 0.95 * length(unique(best$target)))

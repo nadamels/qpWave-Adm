@@ -28,6 +28,7 @@ CONDA_ACTIVATE=${CONDA_ACTIVATE:-/share/apps/NYUAD5/miniconda/3-4.11.0/bin/activ
 REPO_DIR=${REPO_DIR:-${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}}
 [[ -f $REPO_DIR/scripts/qpwave_qpadm.R ]] || REPO_DIR=$DATA_DIR/qpWave-Adm
 # DESIGN=default      : rotating qpAdm, p >= 0.05 (config/pop_pools.tsv)
+# DESIGN=ancient_iran_distal : the distal design with the ANCIENT Iranians (Chalcolithic, Bronze, Iron Age) as targets (config/pop_pools_ancient_iran_distal.tsv)
 # DESIGN=distal       : ancient pre-Copper-Age components (Anatolia_N, Iran_N, WHG, EEHG, WSHG, Onge, Han, PPN, Natufian) as sources, rotated between left and
 #                       right (Narasimhan 2019 SM S4.2.4); p >= 0.01, every weight +-2 SE inside [0,1], up to 4 sources (config/pop_pools_distal.tsv)
 # DESIGN=narasimhan   : paper-style (Narasimhan et al. 2019, SM S4.3): small FIXED right set of pre-Copper-Age populations, sources never rotated
@@ -43,9 +44,14 @@ case $DESIGN in
   distal)     POOLS_FILE=${POOLS_FILE:-$REPO_DIR/config/pop_pools_distal.tsv}
               : "${ROTATE:=1}" "${CI_Z:=2}" "${COMPETE:=0}" "${PTHRESH:=0.01}" "${MAX_SOURCES:=4}" "${MIN_WEIGHT:=0}" "${RUN_HOMOGENEITY:=0}"
               OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out_distal} ;;
-  *) echo "ERROR: DESIGN must be 'default', 'narasimhan' or 'distal'"; exit 1 ;;
+  ancient_iran_distal)
+              POOLS_FILE=${POOLS_FILE:-$REPO_DIR/config/pop_pools_ancient_iran_distal.tsv}
+              : "${TARGETS:=config}" "${ROTATE:=1}" "${CI_Z:=2}" "${COMPETE:=0}" "${PTHRESH:=0.01}" "${MAX_SOURCES:=4}" "${MIN_WEIGHT:=0}" "${RUN_HOMOGENEITY:=0}"
+              OUTDIR=${OUTDIR:-$DATA_DIR/qpwave_qpadm_out_ancient_iran_distal} ;;
+  *) echo "ERROR: DESIGN must be 'default', 'narasimhan', 'distal' or 'ancient_iran_distal'"; exit 1 ;;
 esac
-export ROTATE CI_Z COMPETE
+TARGETS=${TARGETS:-modern}       # modern = the 68 modern Iranians in five groups; config = targets listed in POOLS_FILE (ancient Iranians)
+export ROTATE CI_Z COMPETE TARGETS
 # Step 0 inputs (ADMIXTURE K=8 + PCA of the LD-pruned merged data; row order = the fam given here)
 RUN_EXPLORE=${RUN_EXPLORE:-1}
 EXPLORE_FAM=${EXPLORE_FAM:-$REPO_DIR/fam_meta/all_anc_mod.run3.LDpruned.pca.fam}
@@ -92,7 +98,7 @@ cp "$POOLS_FILE" "$OUTDIR/pop_pools.used.tsv"
   echo "git_dirty: $(git -C "$REPO_DIR" status --porcelain config scripts 2>/dev/null | wc -l) modified file(s) in config/ scripts/"
   echo "pop_pools_md5: $(md5sum "$OUTDIR/pop_pools.used.tsv" | cut -d' ' -f1)"
   echo "data: $DATA_DIR/$BED_PREFIX"
-  echo "DESIGN=$DESIGN POOLS_FILE=$POOLS_FILE ROTATE=$ROTATE CI_Z=$CI_Z COMPETE=$COMPETE"
+  echo "DESIGN=$DESIGN TARGETS=$TARGETS POOLS_FILE=$POOLS_FILE ROTATE=$ROTATE CI_Z=$CI_Z COMPETE=$COMPETE"
   echo "PTHRESH=$PTHRESH MIN_SOURCES=$MIN_SOURCES MAX_SOURCES=$MAX_SOURCES MIN_WEIGHT=$MIN_WEIGHT WEIGHT_TOL=$WEIGHT_TOL TOP_N=$TOP_N"
 } > "$OUTDIR/run_info.txt"
 
@@ -100,7 +106,7 @@ cp "$POOLS_FILE" "$OUTDIR/pop_pools.used.tsv"
 if [[ $RUN_EXPLORE == 1 && -s $EXPLORE_Q && -s $EXPLORE_EIGENVEC && -s $EXPLORE_FAM ]]; then
   echo "[$(date +%T)] step 0/3  ADMIXTURE + PCA exploration (candidate coverage check)"
   python3 -I "$REPO_DIR/scripts/explore_admixture_pca.py" --meta "$REPO_DIR/fam_meta/sample_meta.tsv" --fam "$EXPLORE_FAM" \
-      --pools "$POOLS_FILE" --q "$EXPLORE_Q" --eigenvec "$EXPLORE_EIGENVEC" --outdir "$OUTDIR/explore" \
+      --pools "$POOLS_FILE" --targets "$TARGETS" --q "$EXPLORE_Q" --eigenvec "$EXPLORE_EIGENVEC" --outdir "$OUTDIR/explore" \
     && OUTDIR="$OUTDIR/explore" Rscript "$REPO_DIR/scripts/plot_admixture_pca.R" \
     || echo "WARNING: exploration step failed; continuing with qpWave/qpAdm (it does not depend on it)"
 else
@@ -113,7 +119,7 @@ python3 -I "$REPO_DIR/scripts/make_pops.py" \
   --meta  "$REPO_DIR/fam_meta/sample_meta.tsv" \
   --fam   "$DATA_DIR/$BED_PREFIX.fam" \
   --pools "$POOLS_FILE" \
-  --sublabels \
+  --sublabels --targets "$TARGETS" \
   --outdir "$OUTDIR"
 ln -sf "$DATA_DIR/$BED_PREFIX.bed" "$OUTDIR/plink/data.bed"     # original genotypes are never modified
 ln -sf "$DATA_DIR/$BED_PREFIX.bim" "$OUTDIR/plink/data.bim"
