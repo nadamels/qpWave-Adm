@@ -111,7 +111,8 @@ This test did not exist when the first results were produced, so those results w
 `figures/psmc_by_subpopulation.png|pdf` (thin lines = individuals, thick lines = group median) plus the curves as TSV.
 The script also writes `figures/psmc_by_subpopulation_loglog.png|pdf` (log-log, group medians) for side-by-side comparison with published panels.
 **Input check:** all 72 files analysed exactly the same 6,741,078 100-bp bins (674 Mb, about a quarter of a genome) and only 1.5-1.95% of bins are heterozygous, so the PSMC inputs
-appear to use one shared mask and to under-represent heterozygosity; absolute Ne and time scales are therefore not comparable with published PSMC curves until the inputs are checked.
+use one shared mask (confirmed as the cause by the data owner) that covers only ~1/4 of the genome and under-represents heterozygosity. Comparisons BETWEEN the Iranian groups are fair (same mask, same pipeline);
+absolute Ne and time scales are not comparable with published PSMC curves, which use genome-wide per-individual callable masks.
 Defaults are those of `psmc_plot.pl` (g=25, mu=2.5e-8, s=100); the numbers were checked against the original script. The present-day scale is then N0 ~ 700, far below typical human
 values, so the bin size used for the .psmcfa files, the mutation rate, or strict heterozygote calling may differ from these defaults; the curve shapes do not change, only the axes.
 
