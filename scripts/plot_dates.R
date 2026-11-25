@@ -54,8 +54,9 @@ d <- d %>% arrange(group, mid) %>% group_by(group) %>%
 sg <- summ %>% mutate(group = factor(group, levels = lev), y = as.numeric(group), sd0 = ifelse(is.na(sd_mid), 0, sd_mid))
 ylab_txt <- setNames(sprintf("%s\nn=%d, %s BCE%s", summ$group, summ$n, fy(summ$mean_mid),
                              ifelse(is.na(summ$sd_mid), "", sprintf(" +/- %s", fy(summ$sd_mid)))), summ$group)
-hues <- c("#2a78d6", "#eb6834", "#1baf7a", "#e87ba4", "#6250d6", "#eda100")
-cols <- setNames(hues, c("Iran_ChL_HajjiFiruz", "Iran_ChL_TepeHissar", "Iran_BA_ShahrISokhta_BA1", "Iran_BA_ShahrISokhta_IRN", "Iran_BA_Hasanlu", "Iran_IA_Hasanlu"))
+# colours match the user's legend (Office theme colours); both Shahr-i-Sokhta groups share the purple, both Hasanlu groups share the green
+cols <- c(Iran_ChL_HajjiFiruz = "#156082", Iran_ChL_TepeHissar = "#e97132", Iran_BA_ShahrISokhta_BA1 = "#a02b93",
+          Iran_BA_ShahrISokhta_IRN = "#a02b93", Iran_BA_Hasanlu = "#4ea72e", Iran_IA_Hasanlu = "#4ea72e")
 ink <- "#0b0b0b"; ink2 <- "#52514e"
 
 p <- ggplot() +
