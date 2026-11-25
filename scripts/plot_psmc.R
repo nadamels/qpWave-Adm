@@ -102,4 +102,23 @@ p <- ggplot() +
   guides(colour = guide_legend(override.aes = list(linewidth = 1.6, alpha = 1)))
 ggsave(file.path(OUT, "psmc_by_subpopulation.pdf"), p, width = 9, height = 5.6)
 tryCatch(ggsave(file.path(OUT, "psmc_by_subpopulation.png"), p, width = 9, height = 5.6, dpi = 300), error = function(e) message("PNG not written: ", conditionMessage(e)))
+
+# ---- second figure in the style of published Middle-East PSMC panels: log-log axes, group medians only
+# (the x window is the same as above; y spans 1e2-1e6 so that curves with human-scale Ne can be drawn on the same panel for comparison)
+p2 <- ggplot(med, aes(t, Ne, colour = group)) +
+  geom_step(linewidth = 1.3) +
+  scale_colour_manual(values = cols, labels = lab, name = NULL, breaks = order) +
+  scale_x_log10(limits = c(XMIN, XMAX), breaks = 10^(3:5), labels = function(x) format(x, scientific = TRUE, digits = 1), expand = c(0, 0)) +
+  scale_y_log10(limits = c(1e2, 1e6), breaks = 10^(2:6), labels = function(x) format(x, scientific = TRUE, digits = 1), expand = c(0, 0)) +
+  annotation_logticks(sides = "lb", size = 0.3, colour = ink2) +
+  labs(x = "Years ago", y = "Effective Population Size (Ne)",
+       title = "PSMC of modern Iranians (log-log, group medians)",
+       subtitle = sprintf("g=%g, mu=%g, s=%g, iteration %d; absolute Ne depends on these inputs", G, MU, S, ITER)) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = c(0.80, 0.18), legend.background = element_blank(), legend.key = element_blank(), plot.title.position = "plot",
+        plot.title = element_text(face = "bold"), plot.subtitle = element_text(colour = ink2), panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(colour = "#e6e5e1", linewidth = 0.4), axis.line = element_line(colour = ink, linewidth = 0.4),
+        plot.margin = margin(8, 22, 8, 8))
+ggsave(file.path(OUT, "psmc_by_subpopulation_loglog.pdf"), p2, width = 9, height = 5.6)
+tryCatch(ggsave(file.path(OUT, "psmc_by_subpopulation_loglog.png"), p2, width = 9, height = 5.6, dpi = 300), error = function(e) message("PNG not written: ", conditionMessage(e)))
 message("written to ", OUT)

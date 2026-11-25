@@ -109,6 +109,9 @@ This test did not exist when the first results were produced, so those results w
 `Rscript scripts/plot_psmc.R psmc figures [g=25] [mu=2.5e-8] [s=100] [iter=20] [xmin=1e3] [xmax=1e5]` reads iteration 20 (the `psmc_plot.pl` default; the runs used `-N25`) of every `psmc/*.psmc`, drops the final tied interval group like `psmc_plot.pl`, rescales as it does
 (`N0 = theta0 / (4 mu s)`, years = `2 N0 t g`), assigns each sample to one of the five target groups through `scripts/make_pops.py`, and writes
 `figures/psmc_by_subpopulation.png|pdf` (thin lines = individuals, thick lines = group median) plus the curves as TSV.
+The script also writes `figures/psmc_by_subpopulation_loglog.png|pdf` (log-log, group medians) for side-by-side comparison with published panels.
+**Input check:** all 72 files analysed exactly the same 6,741,078 100-bp bins (674 Mb, about a quarter of a genome) and only 1.5-1.95% of bins are heterozygous, so the PSMC inputs
+appear to use one shared mask and to under-represent heterozygosity; absolute Ne and time scales are therefore not comparable with published PSMC curves until the inputs are checked.
 Defaults are those of `psmc_plot.pl` (g=25, mu=2.5e-8, s=100); the numbers were checked against the original script. The present-day scale is then N0 ~ 700, far below typical human
 values, so the bin size used for the .psmcfa files, the mutation rate, or strict heterozygote calling may differ from these defaults; the curve shapes do not change, only the axes.
 
